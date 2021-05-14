@@ -2,11 +2,13 @@
 eclipse.project.name = appName + '-core'
 
 dependencies {
-	api "com.badlogicgames.gdx:gdx:$gdxVersion"
+//	api "com.badlogicgames.gdx:gdx:$gdxVersion"
 	api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
 	api "io.github.libktx:ktx-vis-style:$ktxVisStyleVersion"
 	api "io.github.libktx:ktx-graphics:$ktxGraphicsVersion"
 	api "io.github.libktx:ktx-vis:$ktxVisVersion"
-	api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
+//	api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
 	api "io.github.libktx:ktx-box2d:$ktxBox2dVersion"
+	api "io.github.libktx:ktx-app:$ktxVersion"
+	api "io.github.libktx:ktx-log:$ktxVersion"
 }
