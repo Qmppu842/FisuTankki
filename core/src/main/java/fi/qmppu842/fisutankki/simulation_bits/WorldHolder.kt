@@ -2,7 +2,6 @@ package fi.qmppu842.fisutankki.simulation_bits
 
 import com.badlogic.gdx.math.Vector2
 import ktx.box2d.createWorld
-import ktx.math.ImmutableVector2
 
 class WorldHolder {
     val fishList = ArrayList<Fish>()
@@ -11,5 +10,13 @@ class WorldHolder {
 
     companion object WorldObject {
         val worldHolder = WorldHolder()
+    }
+
+    fun render(dt: Float) {
+
+    }
+
+    fun update(dt: Float) {
+        world.step(dt, 6, 2)
     }
 }
