@@ -12,9 +12,9 @@ class Main : KtxGame<KtxScreen>() {
 
     override fun create() {
 
-        addScreen(FirstScreen())
+        addScreen(FisuScreen())
 
-        setScreen<FirstScreen>()
+        setScreen<FisuScreen>()
 
         try {
             VisUI.load()

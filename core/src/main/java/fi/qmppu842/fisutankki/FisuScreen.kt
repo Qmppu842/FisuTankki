@@ -1,15 +1,61 @@
 package fi.qmppu842.fisutankki
 
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.GL20
+import com.badlogic.gdx.graphics.OrthographicCamera
+import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
+import fi.qmppu842.fisutankki.simulation_bits.WorldHolder
 import ktx.app.KtxScreen
 
 /** First screen of the application. Displayed after the application is created.  */
-class FirstScreen : KtxScreen {
+class FisuScreen : KtxScreen {
+
+    private val Box2DDebugRenderer: Box2DDebugRenderer = Box2DDebugRenderer()
+    private val b2dCam: OrthographicCamera = OrthographicCamera()
+
+    private val cam = OrthographicCamera()
+    private val batch: SpriteBatch
+
+    //Virtual dimensions of screen
+    val sWidth = Gdx.graphics.width.toFloat()
+    val sHeight = Gdx.graphics.height.toFloat()
+
+    /**
+     * Pixel per meter
+     * This is to scale everything Box2d does down to speed them up massively.
+     */
+    val ppm = 100f
+
+    init {
+        batch = SpriteBatch()
+        b2dCam.setToOrtho(false, sWidth / ppm, sHeight / ppm)
+        cam.setToOrtho(false, sWidth, sHeight)
+    }
+
+
     override fun show() {
         // Prepare your screen here.
     }
 
     override fun render(delta: Float) {
         // Draw your screen here. "delta" is the time since last render in seconds.
+        batch.projectionMatrix = cam.combined
+
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
+
+        //Step simulation one step forward
+        WorldHolder.worldHolder.update(delta)
+
+
+        //Actual drawing of all the things
+        batch.begin()
+        WorldHolder.worldHolder.render(delta)
+        batch.end()
+
+        //Debug rendering
+        Box2DDebugRenderer.render(WorldHolder.worldHolder.world, b2dCam.combined)
+
     }
 
     override fun resize(width: Int, height: Int) {
