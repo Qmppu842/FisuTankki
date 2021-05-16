@@ -8,6 +8,7 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.utils.ScreenUtils
 import fi.qmppu842.fisutankki.simulation_bits.WorldHolder
 import ktx.app.KtxScreen
+import ktx.graphics.use
 import ktx.log.info
 
 /** First screen of the application. Displayed after the application is created.  */
@@ -42,9 +43,6 @@ class FisuScreen : KtxScreen {
     }
 
     override fun render(delta: Float) {
-        // Draw your screen here. "delta" is the time since last render in seconds.
-        batch.projectionMatrix = cam.combined
-
         ScreenUtils.clear(1f, 0f, 0f, 1f)
 
         //Step simulation one step forward
@@ -52,9 +50,9 @@ class FisuScreen : KtxScreen {
 
 
         //Actual drawing of all the things
-        batch.begin()
-        WorldHolder.worldHolder.render(delta)
-        batch.end()
+        batch.use(cam) {
+            WorldHolder.worldHolder.render()
+        }
 
         //Debug rendering
         Box2DDebugRenderer.render(WorldHolder.worldHolder.world, cam.combined)
