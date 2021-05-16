@@ -51,7 +51,7 @@ class FisuScreen : KtxScreen {
 
         //Actual drawing of all the things
         batch.use(cam) {
-            WorldHolder.worldHolder.render()
+            WorldHolder.worldHolder.render(it)
         }
 
         //Debug rendering
