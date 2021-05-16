@@ -5,8 +5,10 @@ import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
+import com.badlogic.gdx.utils.ScreenUtils
 import fi.qmppu842.fisutankki.simulation_bits.WorldHolder
 import ktx.app.KtxScreen
+import ktx.log.info
 
 /** First screen of the application. Displayed after the application is created.  */
 class FisuScreen : KtxScreen {
@@ -36,13 +38,14 @@ class FisuScreen : KtxScreen {
 
     override fun show() {
         // Prepare your screen here.
+        info { "Wad??" }
     }
 
     override fun render(delta: Float) {
         // Draw your screen here. "delta" is the time since last render in seconds.
         batch.projectionMatrix = cam.combined
 
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
+        ScreenUtils.clear(1f, 0f, 0f, 1f)
 
         //Step simulation one step forward
         WorldHolder.worldHolder.update(delta)
@@ -54,7 +57,7 @@ class FisuScreen : KtxScreen {
         batch.end()
 
         //Debug rendering
-        Box2DDebugRenderer.render(WorldHolder.worldHolder.world, b2dCam.combined)
+        Box2DDebugRenderer.render(WorldHolder.worldHolder.world, cam.combined)
 
     }
 
