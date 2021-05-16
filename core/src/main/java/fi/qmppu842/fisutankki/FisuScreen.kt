@@ -15,31 +15,25 @@ import ktx.log.info
 class FisuScreen : KtxScreen {
 
     private val Box2DDebugRenderer: Box2DDebugRenderer = Box2DDebugRenderer()
+    /**
+     * Camera used to scale Box2d world back to normal size for debug rendering.
+     */
     private val b2dCam: OrthographicCamera = OrthographicCamera()
 
     private val cam = OrthographicCamera()
     private val batch: SpriteBatch
 
-    //Virtual dimensions of screen
-    val sWidth = Gdx.graphics.width.toFloat()
-    val sHeight = Gdx.graphics.height.toFloat()
-
-    /**
-     * Pixel per meter
-     * This is to scale everything Box2d does down to speed them up massively.
-     */
-    val ppm = 100f
+    private val gVars = GlobalVariables
 
     init {
         batch = SpriteBatch()
-        b2dCam.setToOrtho(false, sWidth / ppm, sHeight / ppm)
-        cam.setToOrtho(false, sWidth, sHeight)
+        b2dCam.setToOrtho(false, gVars.sWidth.toB2DCoordinates(), gVars.sHeight.toB2DCoordinates())
+        cam.setToOrtho(false, gVars.sWidth, gVars.sHeight)
     }
 
 
     override fun show() {
         // Prepare your screen here.
-        info { "Wad??" }
     }
 
     override fun render(delta: Float) {
@@ -55,7 +49,7 @@ class FisuScreen : KtxScreen {
         }
 
         //Debug rendering
-        Box2DDebugRenderer.render(WorldHolder.worldHolder.world, cam.combined)
+        Box2DDebugRenderer.render(WorldHolder.worldHolder.world, b2dCam.combined)
 
     }
 
