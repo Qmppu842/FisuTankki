@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
+import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.utils.ScreenUtils
 import fi.qmppu842.fisutankki.GlobalVariables
 import fi.qmppu842.fisutankki.toB2DCoordinates
@@ -34,14 +35,19 @@ class WorldHolder {
 
     fun update(dt: Float) {
         world.step(dt, 6, 2)
+        for (fish:Fish in fishList){
+            fish.update(dt)
+        }
     }
 
-    fun addFishToWorld() {
-        val  radius = 100f
+    private fun addFishToWorld() {
+        val  radius = 25f
         val body: Body = world.body {
             position.set(gVars.sWidth.toB2DCoordinates() /2, gVars.sHeight.toB2DCoordinates() / 2)
+            type = BodyDef.BodyType.DynamicBody
             circle(radius = radius.toB2DCoordinates()) {
                 restitution = 0.5f
+
             }
         }
         val fisu = Fish(body, radius*2)
