@@ -5,17 +5,17 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.utils.ScreenUtils
+import fi.qmppu842.fisutankki.GlobalVariables
+import fi.qmppu842.fisutankki.toB2DCoordinates
 import ktx.box2d.body
 import ktx.box2d.circle
 import ktx.box2d.createWorld
 
 class WorldHolder {
     private val fishList = ArrayList<Fish>()
-    private val gravity = Vector2.Zero
-    val world = createWorld(gravity = gravity, true)
+    val world = createWorld(gravity = Vector2.Zero, true)
 
-    val sWidth = Gdx.graphics.width.toFloat()
-    val sHeight = Gdx.graphics.height.toFloat()
+    private val gVars = GlobalVariables
 
     companion object WorldObject {
         val worldHolder = WorldHolder()
@@ -39,8 +39,8 @@ class WorldHolder {
     fun addFishToWorld() {
         val  radius = 100f
         val body: Body = world.body {
-            position.set(sWidth /2, sHeight / 2)
-            circle(radius = radius) {
+            position.set(gVars.sWidth.toB2DCoordinates() /2, gVars.sHeight.toB2DCoordinates() / 2)
+            circle(radius = radius.toB2DCoordinates()) {
                 restitution = 0.5f
             }
         }

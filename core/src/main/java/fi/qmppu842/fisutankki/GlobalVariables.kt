@@ -9,5 +9,6 @@ object GlobalVariables {
 
     const val PPM = 100f
 }
-fun Number.toB2DCoordinates(): Float = (this.toFloat() /GlobalVariables.PPM)
-fun Number.toScreenCoordinates(): Float = (this.toFloat() *GlobalVariables.PPM)
+
+fun Number.toB2DCoordinates(): Float = (this.toFloat() / GlobalVariables.PPM)
+fun Number.toScreenCoordinates(): Float = (this.toFloat() * GlobalVariables.PPM)
