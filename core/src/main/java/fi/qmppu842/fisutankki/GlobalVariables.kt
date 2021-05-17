@@ -13,6 +13,8 @@ object GlobalVariables {
      * This is to scale everything Box2d does down to speed them up massively.
      */
     const val PPM = 100f
+
+    const val outsideBorderSize = 50f
 }
 
 fun Number.toB2DCoordinates(): Float = (this.toFloat() / GlobalVariables.PPM)
