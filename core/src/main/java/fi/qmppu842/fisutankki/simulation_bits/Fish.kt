@@ -154,17 +154,6 @@ class Fish(private val body: Body, private val size: Float) {
         return body.position
     }
 
-    /**
-     * Calculates target body angle from global mass average and its own position.
-     * Ooo soo cool it works, first try!!
-     */
-    private fun fishHiveMindDirection(): Float {
-        var hiveMind = WorldHolder.worldHolder.calcMassCenter()
-        var targetAngle =
-            atan2(hiveMind.second - body.position.y, hiveMind.first - body.position.x) * 180.0 / PI
-        return targetAngle.toFloat()
-    }
-
     fun addAvoidanceSensor() {
         var sensor = body.circle((size * 1.5).toB2DCoordinates()) {
             isSensor = true

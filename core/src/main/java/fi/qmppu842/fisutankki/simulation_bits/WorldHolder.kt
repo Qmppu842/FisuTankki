@@ -34,17 +34,4 @@ class WorldHolder {
             fishList.add(Fish.addRandomFishToWorld(world))
         }
     }
-
-    fun calcMassCenter(): Pair<Float, Float> {
-        var massX = 0f
-        var massY = 0f
-        for (fish: Fish in fishList) {
-            var pos = fish.getPosition()
-            massX += pos.x
-            massY += pos.y
-        }
-        var avgMassX = massX / fishList.size
-        var avgMassY = massY / fishList.size
-        return Pair(avgMassX, avgMassY)
-    }
 }
