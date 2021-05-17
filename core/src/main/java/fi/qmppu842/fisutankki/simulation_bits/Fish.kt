@@ -7,7 +7,6 @@ import com.badlogic.gdx.physics.box2d.Body
 import fi.qmppu842.fisutankki.GlobalVariables
 import fi.qmppu842.fisutankki.toB2DCoordinates
 import fi.qmppu842.fisutankki.toScreenCoordinates
-import ktx.log.info
 
 class Fish(private val body: Body, private val size: Float) {
 
@@ -32,7 +31,6 @@ class Fish(private val body: Body, private val size: Float) {
     }
 
     fun update(dt: Float) {
-//        body.linearVelocity = Vector2(1f, 1f)
         body.setLinearVelocity(1f, 1f)
         donutfyTheWorld()
     }

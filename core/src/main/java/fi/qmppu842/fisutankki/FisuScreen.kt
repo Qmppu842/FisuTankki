@@ -1,7 +1,5 @@
 package fi.qmppu842.fisutankki
 
-import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
@@ -9,7 +7,6 @@ import com.badlogic.gdx.utils.ScreenUtils
 import fi.qmppu842.fisutankki.simulation_bits.WorldHolder
 import ktx.app.KtxScreen
 import ktx.graphics.use
-import ktx.log.info
 
 /** First screen of the application. Displayed after the application is created.  */
 class FisuScreen : KtxScreen {
