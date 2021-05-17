@@ -11,16 +11,24 @@ import fi.qmppu842.fisutankki.toB2DCoordinates
 import fi.qmppu842.fisutankki.toScreenCoordinates
 import ktx.box2d.body
 import ktx.box2d.circle
+import ktx.log.info
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.random.Random
 
 class Fish(private val body: Body, private val size: Float) {
 
-    private lateinit var img: Texture
-    private lateinit var sprite: Sprite
+     lateinit var img: Texture
+     lateinit var sprite: Sprite
     private val gVars = GlobalVariables
+
+    private var velocity = 2f
+
 
     companion object FishCurator {
 
         private val gVars = GlobalVariables
+        private val rand = Random(123890)
 
         /**
          * World: The world to add the fish.
@@ -34,14 +42,18 @@ class Fish(private val body: Body, private val size: Float) {
             world: World,
             radius: Float = 25f,
             posX: Float = gVars.sWidth.toB2DCoordinates() / 2,
-            posY: Float = gVars.sHeight.toB2DCoordinates() / 2
+            posY: Float = gVars.sHeight.toB2DCoordinates() / 2,
+            angle: Float = 0f
         ): Fish {
 
             val body: Body = world.body {
                 position.set(posX, posY)
                 type = BodyDef.BodyType.DynamicBody
+                this.angle = angle
+
                 circle(radius = radius.toB2DCoordinates()) {
-                    restitution = 0.5f
+                    restitution = 1.5f
+                    density = 1090f
                 }
             }
 
@@ -49,27 +61,74 @@ class Fish(private val body: Body, private val size: Float) {
             fisu.initTexture()
             return fisu
         }
+
+        fun addRandomFishToWorld(world: World): Fish {
+            val radius = rand.nextInt(15, 31).toFloat()
+            val angle = rand.nextDouble(Math.PI * 2).toFloat()
+            val posX = rand.nextDouble(gVars.sWidth.toDouble()).toB2DCoordinates()
+            val posY = rand.nextDouble(gVars.sHeight.toDouble()).toB2DCoordinates()
+            return addFishToWorld(
+                world = world,
+                radius = radius,
+                angle = angle,
+                posX = posX,
+                posY = posY
+            )
+        }
     }
 
     fun initTexture() {
         img = Texture("SpiralKoi2.png")
+        if (rand.nextBoolean()){
+            img = Texture("SpiralKoi.png")
+        }
         sprite = Sprite(img)
+//        sprite.x = body.position.x.toScreenCoordinates() - size / 2
+//        sprite.y = body.position.y.toScreenCoordinates() - size / 2
+//        sprite.rotation = body.angle
+        sprite.setSize(size,size)
+//        sprite.setCenter(body.position.x.toScreenCoordinates() - size / 2,body.position.y.toScreenCoordinates() - size / 2)
+        sprite.setOriginCenter()
     }
 
     fun render(batch: Batch) {
-        batch.draw(
-            sprite,
-            body.position.x.toScreenCoordinates() - size / 2,
-            body.position.y.toScreenCoordinates() - size / 2,
-            size,
-            size
-        )
+//        batch.draw(
+//            this.sprite,
+//            body.position.x.toScreenCoordinates() - size / 2,
+//            body.position.y.toScreenCoordinates() - size / 2,
+//            size,
+//            size
+//        )
+//        batch.draw(
+//            this.img,
+//            this.body.position.x.toScreenCoordinates() - size / 2,
+//            this.body.position.y.toScreenCoordinates() - size / 2,
+//            size,
+//            size
+//        )
 
+//        sprite.setPosition(
+//            body.position.x.toScreenCoordinates() - size / 2,
+//            body.position.y.toScreenCoordinates() - size / 2
+//        )
+        sprite.x = body.position.x.toScreenCoordinates() - size / 2
+        sprite.y = body.position.y.toScreenCoordinates() - size / 2
+        sprite.rotation = Math.toDegrees(body.angle.toDouble()).toFloat()
+//        sprite.setRotation(body.angle)
+        sprite.draw(batch)
+//        var asd = sprite.toString().substring(startIndex = 37)
+//        info { "Currently drawing $asd and its body pos is: (${body.position.x.toScreenCoordinates()} | ${body.position.y.toScreenCoordinates()})" }
+//        info { "Currently drawing  $asd and its sprite pos is: (${sprite.x} | ${sprite.y})" }
+//        var koira = 1+1
     }
 
     fun update(dt: Float) {
-        body.setLinearVelocity(1f, 1f)
+        var angle = body.angle
+        var veloX = cos(angle) * velocity
+        var veloY = sin(angle) * velocity
+        body.setLinearVelocity(veloX, veloY)
         donutfyTheWorld()
+//        info { "angle: " + body.angle }
     }
 
     /**

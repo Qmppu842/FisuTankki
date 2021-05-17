@@ -1,5 +1,6 @@
 package fi.qmppu842.fisutankki
 
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
@@ -26,15 +27,18 @@ class FisuScreen : KtxScreen {
         batch = SpriteBatch()
         b2dCam.setToOrtho(false, gVars.sWidth.toB2DCoordinates(), gVars.sHeight.toB2DCoordinates())
         cam.setToOrtho(false, gVars.sWidth, gVars.sHeight)
+
     }
 
 
     override fun show() {
         // Prepare your screen here.
+        WorldHolder.worldHolder.addSchoolOfFishToWorld()
     }
 
     override fun render(delta: Float) {
-        ScreenUtils.clear(1f, 0f, 0f, 1f)
+//        ScreenUtils.clear(1f, 0f, 0f, 1f)
+        ScreenUtils.clear(Color.TEAL)
 
         //Step simulation one step forward
         WorldHolder.worldHolder.update(delta)
