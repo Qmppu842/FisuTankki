@@ -29,6 +29,20 @@ class MyContactListener : ContactListener {
 
     /** Called when two fixtures cease to touch.  */
     override fun endContact(contact: Contact?) {
+        if (contact?.fixtureA != null && contact?.fixtureB != null) {
+
+            var eka = contact.fixtureA?.isSensor ?: false
+            var toka = contact.fixtureB?.isSensor ?: false
+            var ekaFish = (contact.fixtureA.userData as Fish?)
+            var tokaFish = (contact.fixtureB.userData as Fish?)
+            if (ekaFish != null && tokaFish != null) {
+                if (eka) {
+                    ekaFish!!.toAttractList.remove(tokaFish!!)
+                } else if (toka) {
+                    tokaFish!!.toAttractList.remove(ekaFish!!)
+                }
+            }
+        }
     }
 
     override fun preSolve(contact: Contact?, oldManifold: Manifold?) {
