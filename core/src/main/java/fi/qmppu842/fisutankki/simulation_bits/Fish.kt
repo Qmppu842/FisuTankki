@@ -12,11 +12,12 @@ import fi.qmppu842.fisutankki.toB2DCoordinates
 import fi.qmppu842.fisutankki.toScreenCoordinates
 import ktx.box2d.body
 import ktx.box2d.circle
+import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.math.PI
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
-import kotlin.random.Random
 
 class Fish(private val body: Body, private val size: Float) {
 
@@ -26,6 +27,7 @@ class Fish(private val body: Body, private val size: Float) {
 
     private val velocity = 2f
 
+    val name: String = "kala:" + UUID.randomUUID().toString()
 
     //    val toAvoidList = ArrayList<Fish>()
 //    val toAlignList = ArrayList<Fish>()
@@ -37,7 +39,9 @@ class Fish(private val body: Body, private val size: Float) {
         private val gVars = GlobalVariables
         private val rand = gVars.rand
         val fishFilter = 2
-        val notFishFilter = 4
+        val attractFilter = 4
+        val alignFilter = 8
+        val repulseFilter = 16
 
         /**
          * World: The world to add the fish.
@@ -64,7 +68,8 @@ class Fish(private val body: Body, private val size: Float) {
                     restitution = 1.5f
                     density = 1090f
                     filter.categoryBits = fishFilter.toShort()
-                    filter.maskBits = (fishFilter or notFishFilter).toShort()
+                    filter.maskBits =
+                        (fishFilter or attractFilter or alignFilter or repulseFilter).toShort()
                 }
             }
 
@@ -113,7 +118,7 @@ class Fish(private val body: Body, private val size: Float) {
     fun update(dt: Float) {
         var angle = body.angle//fishHiveMindDirection()
         if (toAttractList.size > 0) {
-            angle = localFishHiveMindDirection()
+            angle = (localFishHiveMindDirection() + calcAlignCenter()) / 2
         }
         var veloX = cos(angle) * velocity
         var veloY = sin(angle) * velocity
@@ -154,10 +159,10 @@ class Fish(private val body: Body, private val size: Float) {
         return body.position
     }
 
-    fun addAvoidanceSensor() {
+    fun addRepulsioSensor() {
         var sensor = body.circle((size * 1.5).toB2DCoordinates()) {
             isSensor = true
-            filter.categoryBits = notFishFilter.toShort()
+            filter.categoryBits = repulseFilter.toShort()
             filter.maskBits = fishFilter.toShort()
         }
     }
@@ -165,7 +170,7 @@ class Fish(private val body: Body, private val size: Float) {
     fun addAlignmentSensor() {
         var sensor = body.circle((size * 3).toB2DCoordinates()) {
             isSensor = true
-            filter.categoryBits = notFishFilter.toShort()
+            filter.categoryBits = alignFilter.toShort()
             filter.maskBits = fishFilter.toShort()
         }
     }
@@ -173,7 +178,7 @@ class Fish(private val body: Body, private val size: Float) {
     fun addAttractionSensor() {
         var sensor = body.circle((size * 5.5).toB2DCoordinates()) {
             isSensor = true
-            filter.categoryBits = notFishFilter.toShort()
+            filter.categoryBits = attractFilter.toShort()
             filter.maskBits = fishFilter.toShort()
             userData = this@Fish
         }
@@ -201,6 +206,14 @@ class Fish(private val body: Body, private val size: Float) {
         var avgMassX = massX / toAttractList.size
         var avgMassY = massY / toAttractList.size
         return Pair(avgMassX, avgMassY)
+    }
+
+    private fun calcAlignCenter(): Float {
+        var angleSum = 0f
+        for (fish: Fish in toAttractList) {
+            angleSum += fish.body.angle
+        }
+        return angleSum / toAttractList.size
     }
 
 }

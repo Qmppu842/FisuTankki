@@ -5,8 +5,9 @@ import com.badlogic.gdx.math.Vector2
 import ktx.box2d.createWorld
 
 class WorldHolder {
-    private val fishList = ArrayList<Fish>()
+    private val fishList = ArrayList<Fish>(20)
     val world = createWorld(gravity = Vector2.Zero, true)
+    private val fishNameMap = HashMap<String, Fish>(20)
 
     init {
         world.setContactListener(MyContactListener())
@@ -31,7 +32,13 @@ class WorldHolder {
 
     fun addSchoolOfFishToWorld() {
         for (i in 1..20) {
-            fishList.add(Fish.addRandomFishToWorld(world))
+            var fishe = Fish.addRandomFishToWorld(world)
+            fishList.add(fishe)
+            fishNameMap[fishe.name] = fishe
         }
+    }
+
+    fun getFish(name: String): Fish? {
+        return fishNameMap[name]
     }
 }
