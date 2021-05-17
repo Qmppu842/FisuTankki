@@ -9,13 +9,8 @@ import ktx.log.debug
 class Main : KtxGame<KtxScreen>() {
     private var accum = 0f
     private val STEP_SIZE = 1 / 60f
-    lateinit var gVars: GlobalVariables
 
     override fun create() {
-
-        gVars = GlobalVariables
-        gVars.sHeight
-        gVars.sWidth
         addScreen(FisuScreen())
 
         setScreen<FisuScreen>()

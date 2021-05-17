@@ -12,22 +12,21 @@ import ktx.graphics.use
 /** First screen of the application. Displayed after the application is created.  */
 class FisuScreen : KtxScreen {
 
-    private val Box2DDebugRenderer: Box2DDebugRenderer = Box2DDebugRenderer()
+    private val box2DDebugRenderer: Box2DDebugRenderer = Box2DDebugRenderer()
+
     /**
      * Camera used to scale Box2d world back to normal size for debug rendering.
      */
     private val b2dCam: OrthographicCamera = OrthographicCamera()
 
     private val cam = OrthographicCamera()
-    private val batch: SpriteBatch
+    private val batch: SpriteBatch = SpriteBatch()
 
     private val gVars = GlobalVariables
 
     init {
-        batch = SpriteBatch()
         b2dCam.setToOrtho(false, gVars.sWidth.toB2DCoordinates(), gVars.sHeight.toB2DCoordinates())
         cam.setToOrtho(false, gVars.sWidth, gVars.sHeight)
-
     }
 
 
@@ -37,7 +36,7 @@ class FisuScreen : KtxScreen {
     }
 
     override fun render(delta: Float) {
-//        ScreenUtils.clear(1f, 0f, 0f, 1f)
+        //ScreenUtils.clear(1f, 0f, 0f, 1f)
         ScreenUtils.clear(Color.TEAL)
 
         //Step simulation one step forward
@@ -50,7 +49,7 @@ class FisuScreen : KtxScreen {
         }
 
         //Debug rendering
-        Box2DDebugRenderer.render(WorldHolder.worldHolder.world, b2dCam.combined)
+        box2DDebugRenderer.render(WorldHolder.worldHolder.world, b2dCam.combined)
 
     }
 

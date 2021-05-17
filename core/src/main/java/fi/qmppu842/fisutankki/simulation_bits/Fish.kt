@@ -18,8 +18,8 @@ import kotlin.random.Random
 
 class Fish(private val body: Body, private val size: Float) {
 
-     lateinit var img: Texture
-     lateinit var sprite: Sprite
+    lateinit var img: Texture
+    lateinit var sprite: Sprite
     private val gVars = GlobalVariables
 
     private var velocity = 2f
@@ -38,7 +38,7 @@ class Fish(private val body: Body, private val size: Float) {
          *
          * Returns the ready grilled fish at perfect body temperature.
          */
-        fun addFishToWorld(
+        private fun addFishToWorld(
             world: World,
             radius: Float = 25f,
             posX: Float = gVars.sWidth.toB2DCoordinates() / 2,
@@ -63,7 +63,7 @@ class Fish(private val body: Body, private val size: Float) {
         }
 
         fun addRandomFishToWorld(world: World): Fish {
-            val radius = rand.nextInt(15, 31).toFloat()
+            val radius = rand.nextInt(20, 26).toFloat()
             val angle = rand.nextDouble(Math.PI * 2).toFloat()
             val posX = rand.nextDouble(gVars.sWidth.toDouble()).toB2DCoordinates()
             val posY = rand.nextDouble(gVars.sHeight.toDouble()).toB2DCoordinates()
@@ -78,48 +78,21 @@ class Fish(private val body: Body, private val size: Float) {
     }
 
     fun initTexture() {
-        img = Texture("SpiralKoi2.png")
-        if (rand.nextBoolean()){
-            img = Texture("SpiralKoi.png")
+        img = if (rand.nextBoolean()) {
+            Texture("SpiralKoi.png")
+        } else {
+            Texture("SpiralKoi2.png")
         }
         sprite = Sprite(img)
-//        sprite.x = body.position.x.toScreenCoordinates() - size / 2
-//        sprite.y = body.position.y.toScreenCoordinates() - size / 2
-//        sprite.rotation = body.angle
-        sprite.setSize(size,size)
-//        sprite.setCenter(body.position.x.toScreenCoordinates() - size / 2,body.position.y.toScreenCoordinates() - size / 2)
+        sprite.setSize(size, size)
         sprite.setOriginCenter()
     }
 
     fun render(batch: Batch) {
-//        batch.draw(
-//            this.sprite,
-//            body.position.x.toScreenCoordinates() - size / 2,
-//            body.position.y.toScreenCoordinates() - size / 2,
-//            size,
-//            size
-//        )
-//        batch.draw(
-//            this.img,
-//            this.body.position.x.toScreenCoordinates() - size / 2,
-//            this.body.position.y.toScreenCoordinates() - size / 2,
-//            size,
-//            size
-//        )
-
-//        sprite.setPosition(
-//            body.position.x.toScreenCoordinates() - size / 2,
-//            body.position.y.toScreenCoordinates() - size / 2
-//        )
         sprite.x = body.position.x.toScreenCoordinates() - size / 2
         sprite.y = body.position.y.toScreenCoordinates() - size / 2
         sprite.rotation = Math.toDegrees(body.angle.toDouble()).toFloat()
-//        sprite.setRotation(body.angle)
         sprite.draw(batch)
-//        var asd = sprite.toString().substring(startIndex = 37)
-//        info { "Currently drawing $asd and its body pos is: (${body.position.x.toScreenCoordinates()} | ${body.position.y.toScreenCoordinates()})" }
-//        info { "Currently drawing  $asd and its sprite pos is: (${sprite.x} | ${sprite.y})" }
-//        var koira = 1+1
     }
 
     fun update(dt: Float) {
@@ -128,7 +101,6 @@ class Fish(private val body: Body, private val size: Float) {
         var veloY = sin(angle) * velocity
         body.setLinearVelocity(veloX, veloY)
         donutfyTheWorld()
-//        info { "angle: " + body.angle }
     }
 
     /**
