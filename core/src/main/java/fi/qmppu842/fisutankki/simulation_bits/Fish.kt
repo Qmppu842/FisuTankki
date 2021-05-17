@@ -3,6 +3,7 @@ package fi.qmppu842.fisutankki.simulation_bits
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.Sprite
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.World
@@ -11,7 +12,8 @@ import fi.qmppu842.fisutankki.toB2DCoordinates
 import fi.qmppu842.fisutankki.toScreenCoordinates
 import ktx.box2d.body
 import ktx.box2d.circle
-import ktx.log.info
+import kotlin.math.PI
+import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.random.Random
@@ -96,7 +98,7 @@ class Fish(private val body: Body, private val size: Float) {
     }
 
     fun update(dt: Float) {
-        var angle = body.angle
+        var angle = fishHiveMindDirection()
         var veloX = cos(angle) * velocity
         var veloY = sin(angle) * velocity
         body.setLinearVelocity(veloX, veloY)
@@ -130,6 +132,20 @@ class Fish(private val body: Body, private val size: Float) {
             fishX = (0 - gVars.outsideBorderSize / 2).toB2DCoordinates()
         }
         body.setTransform(fishX, body.position.y, body.angle)
+    }
+
+    fun getPosition(): Vector2 {
+        return body.position
+    }
+
+    /**
+     * Calculates target body angle from global mass average and its own position.
+     * Ooo soo cool it works, first try!!
+     */
+    private fun fishHiveMindDirection(): Float {
+        var hiveMind = WorldHolder.worldHolder.calcMassCenter()
+        var targetAngle = atan2(hiveMind.second  - body.position.y, hiveMind.first  - body.position.x) * 180.0/ PI
+        return targetAngle.toFloat()
     }
 
 
