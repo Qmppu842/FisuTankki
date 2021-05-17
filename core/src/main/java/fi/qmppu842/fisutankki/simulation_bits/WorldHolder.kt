@@ -8,6 +8,10 @@ class WorldHolder {
     private val fishList = ArrayList<Fish>()
     val world = createWorld(gravity = Vector2.Zero, true)
 
+    init {
+        world.setContactListener(MyContactListener())
+    }
+
     companion object WorldObject {
         val worldHolder = WorldHolder()
     }
@@ -26,7 +30,7 @@ class WorldHolder {
     }
 
     fun addSchoolOfFishToWorld() {
-        for (i in 1..20) {
+        for (i in 1..10) {
             fishList.add(Fish.addRandomFishToWorld(world))
         }
     }

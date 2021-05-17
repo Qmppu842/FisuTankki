@@ -27,6 +27,10 @@ class Fish(private val body: Body, private val size: Float) {
     private var velocity = 2f
 
 
+    val toAvoidList = ArrayList<Fish>()
+    val toAlignList = ArrayList<Fish>()
+    val toAttractList = ArrayList<Fish>()
+
     companion object FishCurator {
 
         private val gVars = GlobalVariables
@@ -64,6 +68,7 @@ class Fish(private val body: Body, private val size: Float) {
             fisu.addAvoidanceSensor()
             fisu.addAlignmentSensor()
             fisu.addAttractionSensor()
+            body.userData = fisu
             return fisu
         }
 
@@ -147,22 +152,26 @@ class Fish(private val body: Body, private val size: Float) {
      */
     private fun fishHiveMindDirection(): Float {
         var hiveMind = WorldHolder.worldHolder.calcMassCenter()
-        var targetAngle = atan2(hiveMind.second  - body.position.y, hiveMind.first  - body.position.x) * 180.0/ PI
+        var targetAngle =
+            atan2(hiveMind.second - body.position.y, hiveMind.first - body.position.x) * 180.0 / PI
         return targetAngle.toFloat()
     }
 
-    fun addAvoidanceSensor(){
-       var sensor = body.circle((size*1.5).toB2DCoordinates()){
-           isSensor = true
-       }
+    fun addAvoidanceSensor() {
+        var sensor = body.circle((size * 1.5).toB2DCoordinates()) {
+            isSensor = true
+
+        }
     }
-    fun addAlignmentSensor(){
-        var sensor = body.circle((size*3).toB2DCoordinates()){
+
+    fun addAlignmentSensor() {
+        var sensor = body.circle((size * 3).toB2DCoordinates()) {
             isSensor = true
         }
     }
-    fun addAttractionSensor(){
-        var sensor = body.circle((size*5.5).toB2DCoordinates()){
+
+    fun addAttractionSensor() {
+        var sensor = body.circle((size * 5.5).toB2DCoordinates()) {
             isSensor = true
         }
     }
