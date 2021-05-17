@@ -115,25 +115,40 @@ class Fish(private val body: Body, private val size: Float) {
         sprite.draw(batch)
     }
 
+    var dtCollect = 0f
+    var dtCollect2 = 0f
+    var dtCollect3 = 0f
+
     fun update(dt: Float) {
 //        var angle = body.angle//fishHiveMindDirection()
-        var angle = when {
-            toRepulseList.size > 0 -> {
-                calcRepulsion()
-            }
-            toAlignList.size > 0 -> {
-                calcAlignCenter()
-            }
-            toAttractList.size > 0 -> {
-                calcAttractCenter()
-            }
-            else -> {
-                body.angle
-            }
+        dtCollect -= dt
+        var angle = body.angle
+//        if (dtCollect < 0.0f) {
+//            dtCollect += 0.5f
+            angle = when {
+                toRepulseList.size > 0 -> {
+                    calcRepulsion()
+                }
+                toAlignList.size > 0 -> {
+                    calcAlignCenter()
+                }
+                toAttractList.size > 0 -> {
+                    calcAttractCenter()
+                }
+                else -> {
+                    body.angle
+                }
+//            }
         }
-        var veloX = cos(angle) * velocity
-        var veloY = sin(angle) * velocity
-        body.setLinearVelocity(veloX, veloY)
+//        if (dtCollect < 0.0f) {
+//            dtCollect += 0.5f
+            var veloX = cos(angle) * velocity
+            var veloY = sin(angle) * velocity
+            body.setLinearVelocity(veloX, veloY)
+//        }
+//        else{
+//            body.linearVelocity = body.linearVelocity
+//        }
         donutfyTheWorld()
     }
 
@@ -221,10 +236,16 @@ class Fish(private val body: Body, private val size: Float) {
 
     private fun calcAlignCenter(): Float {
         var angleSum = 0f
+        var cosSum = 0f
+        var sinSum = 0f
         for (fish: Fish in toAlignList) {
             angleSum += fish.body.angle
+            cosSum += cos(fish.body.angle)
+            sinSum += sin(fish.body.angle)
         }
-        return angleSum / toAlignList.size
+//        return angleSum / toAlignList.size
+        return atan2(sinSum,cosSum)
+//        return atan2(cosSum, sinSum)
     }
 
     private fun calcRepulsion(): Float {
@@ -236,4 +257,6 @@ class Fish(private val body: Body, private val size: Float) {
             ) * 180.0 / PI * 2
         return targetAngle.toFloat()
     }
+
+    lateinit var debugRepBody:Body
 }
