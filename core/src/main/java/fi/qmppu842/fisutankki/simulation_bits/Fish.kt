@@ -4,15 +4,52 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.physics.box2d.Body
+import com.badlogic.gdx.physics.box2d.BodyDef
+import com.badlogic.gdx.physics.box2d.World
 import fi.qmppu842.fisutankki.GlobalVariables
 import fi.qmppu842.fisutankki.toB2DCoordinates
 import fi.qmppu842.fisutankki.toScreenCoordinates
+import ktx.box2d.body
+import ktx.box2d.circle
 
 class Fish(private val body: Body, private val size: Float) {
 
-    lateinit var img: Texture
-    lateinit var sprite: Sprite
+    private lateinit var img: Texture
+    private lateinit var sprite: Sprite
     private val gVars = GlobalVariables
+
+    companion object FishCurator {
+
+        private val gVars = GlobalVariables
+
+        /**
+         * World: The world to add the fish.
+         * Radius: how big the fish should be.
+         * posX: x position of the fish.
+         * posY: y position of the fish.
+         *
+         * Returns the ready grilled fish at perfect body temperature.
+         */
+        fun addFishToWorld(
+            world: World,
+            radius: Float = 25f,
+            posX: Float = gVars.sWidth.toB2DCoordinates() / 2,
+            posY: Float = gVars.sHeight.toB2DCoordinates() / 2
+        ): Fish {
+
+            val body: Body = world.body {
+                position.set(posX, posY)
+                type = BodyDef.BodyType.DynamicBody
+                circle(radius = radius.toB2DCoordinates()) {
+                    restitution = 0.5f
+                }
+            }
+
+            val fisu = Fish(body, radius * 2)
+            fisu.initTexture()
+            return fisu
+        }
+    }
 
     fun initTexture() {
         img = Texture("SpiralKoi2.png")
@@ -39,7 +76,7 @@ class Fish(private val body: Body, private val size: Float) {
      * When Fish tries to exit too far, this method will bring them back on the other side of the world.
      * Well, its proper name would be screen wrap x and y wise.
      */
-    fun donutfyTheWorld() {
+    private fun donutfyTheWorld() {
         screenWrapX()
         screenWrapY()
     }
@@ -63,5 +100,6 @@ class Fish(private val body: Body, private val size: Float) {
         }
         body.setTransform(fishX, body.position.y, body.angle)
     }
+
 
 }
