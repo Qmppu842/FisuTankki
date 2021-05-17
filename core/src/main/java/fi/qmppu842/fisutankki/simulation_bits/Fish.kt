@@ -12,6 +12,8 @@ import fi.qmppu842.fisutankki.toB2DCoordinates
 import fi.qmppu842.fisutankki.toScreenCoordinates
 import ktx.box2d.body
 import ktx.box2d.circle
+import ktx.box2d.edge
+import ktx.box2d.polygon
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.PI
@@ -106,6 +108,7 @@ class Fish(private val body: Body, private val size: Float) {
         sprite = Sprite(img)
         sprite.setSize(size, size)
         sprite.setOriginCenter()
+        initDebugBody()
     }
 
     fun render(batch: Batch) {
@@ -125,26 +128,26 @@ class Fish(private val body: Body, private val size: Float) {
         var angle = body.angle
 //        if (dtCollect < 0.0f) {
 //            dtCollect += 0.5f
-            angle = when {
-                toRepulseList.size > 0 -> {
-                    calcRepulsion()
-                }
-                toAlignList.size > 0 -> {
-                    calcAlignCenter()
-                }
-                toAttractList.size > 0 -> {
-                    calcAttractCenter()
-                }
-                else -> {
-                    body.angle
-                }
+        angle = when {
+//            toRepulseList.size > 0 -> {
+//                calcRepulsion()
 //            }
+//            toAlignList.size > 0 -> {
+//                calcAlignCenter()
+//            }
+            toAttractList.size > 0 -> {
+                calcAttractCenter()
+            }
+            else -> {
+                body.angle
+//            }
+            }
         }
 //        if (dtCollect < 0.0f) {
 //            dtCollect += 0.5f
-            var veloX = cos(angle) * velocity
-            var veloY = sin(angle) * velocity
-            body.setLinearVelocity(veloX, veloY)
+        var veloX = cos(angle) * velocity
+        var veloY = sin(angle) * velocity
+        body.setLinearVelocity(veloX, veloY)
 //        }
 //        else{
 //            body.linearVelocity = body.linearVelocity
@@ -218,6 +221,13 @@ class Fish(private val body: Body, private val size: Float) {
         var hiveMind = localFishHiveMindDirection(toAttractList)
         var targetAngle =
             atan2(hiveMind.second - body.position.y, hiveMind.first - body.position.x) * 180.0 / PI
+
+        debugRepBody.setTransform(
+            body.position.x ,
+            body.position.y ,
+            targetAngle.toFloat()
+        )
+
         return targetAngle.toFloat()
     }
 
@@ -244,7 +254,7 @@ class Fish(private val body: Body, private val size: Float) {
             sinSum += sin(fish.body.angle)
         }
 //        return angleSum / toAlignList.size
-        return atan2(sinSum,cosSum)
+        return atan2(sinSum, cosSum)
 //        return atan2(cosSum, sinSum)
     }
 
@@ -254,9 +264,39 @@ class Fish(private val body: Body, private val size: Float) {
             atan2(
                 hiveMind.second - body.position.y,
                 hiveMind.first - body.position.x
-            ) * 180.0 / PI * 2
+            ) * 180.0 / PI
+
+//        debugRepBody.setTransform(
+//            body.position.x ,//+ veloX.toFloat() * 1.1f,
+//            body.position.y ,//+ veloY.toFloat() * 1.1f,
+//            targetAngle.toFloat()
+//        )
+
         return targetAngle.toFloat()
     }
 
-    lateinit var debugRepBody:Body
+    lateinit var debugRepBody: Body
+
+    fun initDebugBody() {
+
+        debugRepBody = WorldHolder.worldHolder.world.body {
+//            polygon(
+//                Vector2(-size.toB2DCoordinates(), -size.toB2DCoordinates()),
+//                Vector2(0f, size.toB2DCoordinates()),
+//                Vector2(size.toB2DCoordinates(), -size.toB2DCoordinates())
+//            ) {
+//                isSensor = true
+//                filter.categoryBits = 512.toShort()
+//                filter.maskBits = 256.toShort()
+//            }
+            edge(
+                from = Vector2(-size.toB2DCoordinates(), -size.toB2DCoordinates()),
+                to = Vector2(size.toB2DCoordinates(), size.toB2DCoordinates())
+            ) {
+                isSensor = true
+                filter.categoryBits = 512.toShort()
+                filter.maskBits = 256.toShort()
+            }
+        }
+    }
 }

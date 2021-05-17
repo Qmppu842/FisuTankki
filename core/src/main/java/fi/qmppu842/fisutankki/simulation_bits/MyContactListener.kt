@@ -4,9 +4,12 @@ import com.badlogic.gdx.physics.box2d.Contact
 import com.badlogic.gdx.physics.box2d.ContactImpulse
 import com.badlogic.gdx.physics.box2d.ContactListener
 import com.badlogic.gdx.physics.box2d.Manifold
+import fi.qmppu842.fisutankki.GlobalVariables
 import ktx.log.info
 
 class MyContactListener : ContactListener {
+    private val gVars = GlobalVariables
+
     /** Called when two fixtures begin to touch.  */
     override fun beginContact(contact: Contact?) {
         var a: Fish? = contact?.fixtureA?.body?.userData as Fish?
@@ -16,16 +19,29 @@ class MyContactListener : ContactListener {
             var toka = contact?.fixtureB?.isSensor ?: false
             if (eka) {
                 when (contact?.fixtureA?.filterData?.categoryBits) {
-                    Fish.repulseFilter.toShort() -> {a!!.toRepulseList.add(b!!)}
-                    Fish.alignFilter.toShort() -> {a!!.toAlignList.add(b!!)}
-                    Fish.attractFilter.toShort() -> {a!!.toAttractList.add(b!!)}
+                    Fish.repulseFilter.toShort() -> {
+                        a!!.toRepulseList.add(b!!)
+                    }
+                    Fish.alignFilter.toShort() -> {
+                        gVars.dtMultiplier = 0.05f
+                        a!!.toAlignList.add(b!!)
+                    }
+                    Fish.attractFilter.toShort() -> {
+                        a!!.toAttractList.add(b!!)
+                    }
                 }
 //                a!!.toAttractList.add(b!!)
             } else if (toka) {
                 when (contact?.fixtureB?.filterData?.categoryBits) {
-                    Fish.repulseFilter.toShort() -> {b!!.toRepulseList.add(a!!)}
-                    Fish.alignFilter.toShort() -> {b!!.toAlignList.add(a!!)}
-                    Fish.attractFilter.toShort() -> {b!!.toAttractList.add(a!!)}
+                    Fish.repulseFilter.toShort() -> {
+                        b!!.toRepulseList.add(a!!)
+                    }
+                    Fish.alignFilter.toShort() -> {
+                        b!!.toAlignList.add(a!!)
+                    }
+                    Fish.attractFilter.toShort() -> {
+                        b!!.toAttractList.add(a!!)
+                    }
                 }
 //                b!!.toAttractList.add(a!!)
             }
@@ -41,15 +57,28 @@ class MyContactListener : ContactListener {
             var toka = contact?.fixtureB?.isSensor ?: false
             if (eka) {
                 when (contact?.fixtureA?.filterData?.categoryBits) {
-                    Fish.repulseFilter.toShort() -> {a!!.toRepulseList.remove(b!!)}
-                    Fish.alignFilter.toShort() -> {a!!.toAlignList.remove(b!!)}
-                    Fish.attractFilter.toShort() -> {a!!.toAttractList.add(b!!)}
+                    Fish.repulseFilter.toShort() -> {
+                        a!!.toRepulseList.remove(b!!)
+                    }
+                    Fish.alignFilter.toShort() -> {
+                        gVars.dtMultiplier = 1f
+                        a!!.toAlignList.remove(b!!)
+                    }
+                    Fish.attractFilter.toShort() -> {
+                        a!!.toAttractList.add(b!!)
+                    }
                 }
             } else if (toka) {
                 when (contact?.fixtureB?.filterData?.categoryBits) {
-                    Fish.repulseFilter.toShort() -> {b!!.toRepulseList.remove(a!!)}
-                    Fish.alignFilter.toShort() -> {b!!.toAlignList.remove(a!!)}
-                    Fish.attractFilter.toShort() -> {b!!.toAttractList.remove(a!!)}
+                    Fish.repulseFilter.toShort() -> {
+                        b!!.toRepulseList.remove(a!!)
+                    }
+                    Fish.alignFilter.toShort() -> {
+                        b!!.toAlignList.remove(a!!)
+                    }
+                    Fish.attractFilter.toShort() -> {
+                        b!!.toAttractList.remove(a!!)
+                    }
                 }
             }
         }

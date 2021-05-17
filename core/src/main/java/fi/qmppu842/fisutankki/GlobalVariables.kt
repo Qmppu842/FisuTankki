@@ -18,6 +18,8 @@ object GlobalVariables {
     const val outsideBorderSize = 50f
 
     val rand = Random(123892)
+
+    var dtMultiplier = 1f
 }
 
 fun Number.toB2DCoordinates(): Float = (this.toFloat() / GlobalVariables.PPM)
