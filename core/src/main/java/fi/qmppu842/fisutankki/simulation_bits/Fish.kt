@@ -24,17 +24,20 @@ class Fish(private val body: Body, private val size: Float) {
     lateinit var sprite: Sprite
     private val gVars = GlobalVariables
 
-    private var velocity = 2f
+    private val velocity = 2f
 
 
-    val toAvoidList = ArrayList<Fish>()
-    val toAlignList = ArrayList<Fish>()
+    //    val toAvoidList = ArrayList<Fish>()
+//    val toAlignList = ArrayList<Fish>()
     val toAttractList = ArrayList<Fish>()
+
 
     companion object FishCurator {
 
         private val gVars = GlobalVariables
-        private val rand = Random(123890)
+        private val rand = gVars.rand
+        val fishFilter = 2
+        val notFishFilter = 4
 
         /**
          * World: The world to add the fish.
@@ -60,13 +63,15 @@ class Fish(private val body: Body, private val size: Float) {
                 circle(radius = radius.toB2DCoordinates()) {
                     restitution = 1.5f
                     density = 1090f
+                    filter.categoryBits = fishFilter.toShort()
+                    filter.maskBits = (fishFilter or notFishFilter).toShort()
                 }
             }
 
             val fisu = Fish(body, radius * 2)
             fisu.initTexture()
-            fisu.addAvoidanceSensor()
-            fisu.addAlignmentSensor()
+//            fisu.addAvoidanceSensor()
+//            fisu.addAlignmentSensor()
             fisu.addAttractionSensor()
             body.userData = fisu
             return fisu
@@ -106,7 +111,10 @@ class Fish(private val body: Body, private val size: Float) {
     }
 
     fun update(dt: Float) {
-        var angle = fishHiveMindDirection()
+        var angle = body.angle//fishHiveMindDirection()
+        if (toAttractList.size > 0) {
+            angle = localFishHiveMindDirection()
+        }
         var veloX = cos(angle) * velocity
         var veloY = sin(angle) * velocity
         body.setLinearVelocity(veloX, veloY)
@@ -160,20 +168,50 @@ class Fish(private val body: Body, private val size: Float) {
     fun addAvoidanceSensor() {
         var sensor = body.circle((size * 1.5).toB2DCoordinates()) {
             isSensor = true
-
+            filter.categoryBits = notFishFilter.toShort()
+            filter.maskBits = fishFilter.toShort()
         }
     }
 
     fun addAlignmentSensor() {
         var sensor = body.circle((size * 3).toB2DCoordinates()) {
             isSensor = true
+            filter.categoryBits = notFishFilter.toShort()
+            filter.maskBits = fishFilter.toShort()
         }
     }
 
     fun addAttractionSensor() {
         var sensor = body.circle((size * 5.5).toB2DCoordinates()) {
             isSensor = true
+            filter.categoryBits = notFishFilter.toShort()
+            filter.maskBits = fishFilter.toShort()
+            userData = this@Fish
         }
+    }
+
+    /**
+     * Calculates target body angle from global mass average and its own position.
+     * Ooo soo cool it works, first try!!
+     */
+    private fun localFishHiveMindDirection(): Float {
+        var hiveMind = calcAttractCenter()
+        var targetAngle =
+            atan2(hiveMind.second - body.position.y, hiveMind.first - body.position.x) * 180.0 / PI
+        return targetAngle.toFloat()
+    }
+
+    private fun calcAttractCenter(): Pair<Float, Float> {
+        var massX = 0f
+        var massY = 0f
+        for (fish: Fish in toAttractList) {
+            var pos = fish.getPosition()
+            massX += pos.x
+            massY += pos.y
+        }
+        var avgMassX = massX / toAttractList.size
+        var avgMassY = massY / toAttractList.size
+        return Pair(avgMassX, avgMassY)
     }
 
 }

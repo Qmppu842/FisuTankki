@@ -1,6 +1,7 @@
 package fi.qmppu842.fisutankki
 
 import com.badlogic.gdx.Gdx
+import kotlin.random.Random
 
 object GlobalVariables {
 
@@ -15,6 +16,8 @@ object GlobalVariables {
     const val PPM = 100f
 
     const val outsideBorderSize = 50f
+
+    val rand = Random(123892)
 }
 
 fun Number.toB2DCoordinates(): Float = (this.toFloat() / GlobalVariables.PPM)

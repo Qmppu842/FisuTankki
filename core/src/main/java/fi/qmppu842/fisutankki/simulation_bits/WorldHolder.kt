@@ -30,7 +30,7 @@ class WorldHolder {
     }
 
     fun addSchoolOfFishToWorld() {
-        for (i in 1..10) {
+        for (i in 1..20) {
             fishList.add(Fish.addRandomFishToWorld(world))
         }
     }
