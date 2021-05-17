@@ -61,6 +61,9 @@ class Fish(private val body: Body, private val size: Float) {
 
             val fisu = Fish(body, radius * 2)
             fisu.initTexture()
+            fisu.addAvoidanceSensor()
+            fisu.addAlignmentSensor()
+            fisu.addAttractionSensor()
             return fisu
         }
 
@@ -148,5 +151,20 @@ class Fish(private val body: Body, private val size: Float) {
         return targetAngle.toFloat()
     }
 
+    fun addAvoidanceSensor(){
+       var sensor = body.circle((size*1.5).toB2DCoordinates()){
+           isSensor = true
+       }
+    }
+    fun addAlignmentSensor(){
+        var sensor = body.circle((size*3).toB2DCoordinates()){
+            isSensor = true
+        }
+    }
+    fun addAttractionSensor(){
+        var sensor = body.circle((size*5.5).toB2DCoordinates()){
+            isSensor = true
+        }
+    }
 
 }
