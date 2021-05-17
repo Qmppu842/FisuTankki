@@ -29,8 +29,8 @@ class Fish(private val body: Body, private val size: Float) {
 
     val name: String = "kala:" + UUID.randomUUID().toString()
 
-    //    val toAvoidList = ArrayList<Fish>()
-//    val toAlignList = ArrayList<Fish>()
+    val toRepulseList = ArrayList<Fish>()
+    val toAlignList = ArrayList<Fish>()
     val toAttractList = ArrayList<Fish>()
 
 
@@ -75,8 +75,8 @@ class Fish(private val body: Body, private val size: Float) {
 
             val fisu = Fish(body, radius * 2)
             fisu.initTexture()
-//            fisu.addAvoidanceSensor()
-//            fisu.addAlignmentSensor()
+            fisu.addRepulsioSensor()
+            fisu.addAlignmentSensor()
             fisu.addAttractionSensor()
             body.userData = fisu
             return fisu
@@ -116,9 +116,20 @@ class Fish(private val body: Body, private val size: Float) {
     }
 
     fun update(dt: Float) {
-        var angle = body.angle//fishHiveMindDirection()
-        if (toAttractList.size > 0) {
-            angle = (localFishHiveMindDirection() + calcAlignCenter()) / 2
+//        var angle = body.angle//fishHiveMindDirection()
+        var angle = when {
+            toRepulseList.size > 0 -> {
+                calcRepulsion()
+            }
+            toAlignList.size > 0 -> {
+                calcAlignCenter()
+            }
+            toAttractList.size > 0 -> {
+                calcAttractCenter()
+            }
+            else -> {
+                body.angle
+            }
         }
         var veloX = cos(angle) * velocity
         var veloY = sin(angle) * velocity
@@ -188,32 +199,41 @@ class Fish(private val body: Body, private val size: Float) {
      * Calculates target body angle from global mass average and its own position.
      * Ooo soo cool it works, first try!!
      */
-    private fun localFishHiveMindDirection(): Float {
-        var hiveMind = calcAttractCenter()
+    private fun calcAttractCenter(): Float {
+        var hiveMind = localFishHiveMindDirection(toAttractList)
         var targetAngle =
             atan2(hiveMind.second - body.position.y, hiveMind.first - body.position.x) * 180.0 / PI
         return targetAngle.toFloat()
     }
 
-    private fun calcAttractCenter(): Pair<Float, Float> {
+    private fun localFishHiveMindDirection(array: ArrayList<Fish>): Pair<Float, Float> {
         var massX = 0f
         var massY = 0f
-        for (fish: Fish in toAttractList) {
+        for (fish: Fish in array) {
             var pos = fish.getPosition()
             massX += pos.x
             massY += pos.y
         }
-        var avgMassX = massX / toAttractList.size
-        var avgMassY = massY / toAttractList.size
+        var avgMassX = massX / array.size
+        var avgMassY = massY / array.size
         return Pair(avgMassX, avgMassY)
     }
 
     private fun calcAlignCenter(): Float {
         var angleSum = 0f
-        for (fish: Fish in toAttractList) {
+        for (fish: Fish in toAlignList) {
             angleSum += fish.body.angle
         }
-        return angleSum / toAttractList.size
+        return angleSum / toAlignList.size
     }
 
+    private fun calcRepulsion(): Float {
+        var hiveMind = localFishHiveMindDirection(toRepulseList)
+        var targetAngle =
+            atan2(
+                hiveMind.second - body.position.y,
+                hiveMind.first - body.position.x
+            ) * 180.0 / PI * 2
+        return targetAngle.toFloat()
+    }
 }

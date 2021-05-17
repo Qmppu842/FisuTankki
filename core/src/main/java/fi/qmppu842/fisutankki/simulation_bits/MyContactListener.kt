@@ -9,66 +9,48 @@ import ktx.log.info
 class MyContactListener : ContactListener {
     /** Called when two fixtures begin to touch.  */
     override fun beginContact(contact: Contact?) {
-//        var kala = 1 + 1
-//        info { "passinger" }
-//        if (contact?.fixtureA != null && contact?.fixtureB != null) {
-//
-//            var eka = contact.fixtureA?.isSensor ?: false
-//            var toka = contact.fixtureB?.isSensor ?: false
-//            var ekaFish = (contact.fixtureA.userData as Fish?)
-//            var tokaFish = (contact.fixtureB.userData as Fish?)
-//            if (ekaFish != null && tokaFish != null) {
-//                if (eka) {
-//                    ekaFish!!.toAttractList.add(tokaFish!!)
-//                } else if (toka) {
-//                    tokaFish!!.toAttractList.add(ekaFish!!)
-//                }
-//            }
-//        }
-
-//        if (contact?.fixtureA != null && contact.fixtureB != null) {
-//
-//        }
-
         var a: Fish? = contact?.fixtureA?.body?.userData as Fish?
         var b: Fish? = contact?.fixtureB?.body?.userData as Fish?
         if (a != null && b != null) {
             var eka = contact?.fixtureA?.isSensor ?: false
             var toka = contact?.fixtureB?.isSensor ?: false
             if (eka) {
-                a!!.toAttractList.add(b!!)
+                when (contact?.fixtureA?.filterData?.categoryBits) {
+                    Fish.repulseFilter.toShort() -> {a!!.toRepulseList.add(b!!)}
+                    Fish.alignFilter.toShort() -> {a!!.toAlignList.add(b!!)}
+                    Fish.attractFilter.toShort() -> {a!!.toAttractList.add(b!!)}
+                }
+//                a!!.toAttractList.add(b!!)
             } else if (toka) {
-                b!!.toAttractList.add(a!!)
+                when (contact?.fixtureB?.filterData?.categoryBits) {
+                    Fish.repulseFilter.toShort() -> {b!!.toRepulseList.add(a!!)}
+                    Fish.alignFilter.toShort() -> {b!!.toAlignList.add(a!!)}
+                    Fish.attractFilter.toShort() -> {b!!.toAttractList.add(a!!)}
+                }
+//                b!!.toAttractList.add(a!!)
             }
         }
     }
 
     /** Called when two fixtures cease to touch.  */
     override fun endContact(contact: Contact?) {
-//        if (contact?.fixtureA != null && contact?.fixtureB != null) {
-//
-//            var eka = contact.fixtureA?.isSensor ?: false
-//            var toka = contact.fixtureB?.isSensor ?: false
-//            var ekaFish = (contact.fixtureA.userData as Fish?)
-//            var tokaFish = (contact.fixtureB.userData as Fish?)
-//            if (ekaFish != null && tokaFish != null) {
-//                if (eka) {
-//                    ekaFish!!.toAttractList.remove(tokaFish!!)
-//                } else if (toka) {
-//                    tokaFish!!.toAttractList.remove(ekaFish!!)
-//                }
-//            }
-//        }
-
         var a: Fish? = contact?.fixtureA?.body?.userData as Fish?
         var b: Fish? = contact?.fixtureB?.body?.userData as Fish?
         if (a != null && b != null) {
             var eka = contact?.fixtureA?.isSensor ?: false
             var toka = contact?.fixtureB?.isSensor ?: false
             if (eka) {
-                a!!.toAttractList.remove(b!!)
+                when (contact?.fixtureA?.filterData?.categoryBits) {
+                    Fish.repulseFilter.toShort() -> {a!!.toRepulseList.remove(b!!)}
+                    Fish.alignFilter.toShort() -> {a!!.toAlignList.remove(b!!)}
+                    Fish.attractFilter.toShort() -> {a!!.toAttractList.add(b!!)}
+                }
             } else if (toka) {
-                b!!.toAttractList.remove(a!!)
+                when (contact?.fixtureB?.filterData?.categoryBits) {
+                    Fish.repulseFilter.toShort() -> {b!!.toRepulseList.remove(a!!)}
+                    Fish.alignFilter.toShort() -> {b!!.toAlignList.remove(a!!)}
+                    Fish.attractFilter.toShort() -> {b!!.toAttractList.remove(a!!)}
+                }
             }
         }
     }
