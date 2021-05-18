@@ -36,7 +36,7 @@ class WorldHolder {
     }
 
     fun addSchoolOfFishToWorld() {
-        for (i in 1..3) {
+        for (i in 1..13) {
             var fishe = Fish.addRandomFishToWorld(world)
             fishList.add(fishe)
             fishNameMap[fishe.name] = fishe

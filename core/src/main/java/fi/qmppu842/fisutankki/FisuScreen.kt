@@ -49,7 +49,7 @@ class FisuScreen : KtxScreen {
         }
 
         //Debug rendering
-        box2DDebugRenderer.render(WorldHolder.worldHolder.world, b2dCam.combined)
+//        box2DDebugRenderer.render(WorldHolder.worldHolder.world, b2dCam.combined)
 
     }
 

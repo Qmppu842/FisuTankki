@@ -14,12 +14,10 @@ import ktx.box2d.body
 import ktx.box2d.circle
 import ktx.box2d.edge
 import ktx.box2d.polygon
+import ktx.math.vec2
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.math.PI
-import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.sin
+import kotlin.math.*
 
 class Fish(private val body: Body, private val size: Float) {
 
@@ -35,6 +33,7 @@ class Fish(private val body: Body, private val size: Float) {
     val toAlignList = ArrayList<Fish>()
     val toAttractList = ArrayList<Fish>()
 
+    var bodyAngle = 0f
 
     companion object FishCurator {
 
@@ -64,14 +63,15 @@ class Fish(private val body: Body, private val size: Float) {
             val body: Body = world.body {
                 position.set(posX, posY)
                 type = BodyDef.BodyType.DynamicBody
-                this.angle = angle
+//                this.angle = angle
 
                 circle(radius = radius.toB2DCoordinates()) {
                     restitution = 1.5f
                     density = 1090f
                     filter.categoryBits = fishFilter.toShort()
                     filter.maskBits =
-                        (fishFilter or attractFilter or alignFilter or repulseFilter).toShort()
+//                        (attractFilter or alignFilter or repulseFilter).toShort()
+                    (fishFilter or attractFilter or alignFilter or repulseFilter).toShort()
                 }
             }
 
@@ -80,12 +80,14 @@ class Fish(private val body: Body, private val size: Float) {
             fisu.addRepulsioSensor()
             fisu.addAlignmentSensor()
             fisu.addAttractionSensor()
+            fisu.addFishToItsOwnSensorLists()
             body.userData = fisu
+            fisu.bodyAngle = angle
             return fisu
         }
 
         fun addRandomFishToWorld(world: World): Fish {
-            var bonus = 20
+            var bonus = 0
             val radius = rand.nextInt(20 + bonus, 26 + bonus).toFloat()
             val angle = rand.nextDouble(Math.PI * 2).toFloat()
             val posX = rand.nextDouble(gVars.sWidth.toDouble()).toB2DCoordinates()
@@ -100,6 +102,12 @@ class Fish(private val body: Body, private val size: Float) {
         }
     }
 
+    fun addFishToItsOwnSensorLists() {
+        toAlignList.add(this)
+        toAttractList.add(this)
+        toRepulseList.add(this)
+    }
+
     lateinit var debugSprite: Sprite
     fun initTexture() {
         img = if (rand.nextBoolean()) {
@@ -111,74 +119,50 @@ class Fish(private val body: Body, private val size: Float) {
         sprite.setSize(size, size)
         sprite.setOriginCenter()
 
-        debugSprite = Sprite(Texture("randomLine.png"))
+        debugSprite = Sprite(Texture("debugBall.png"))
 //        debugSprite.setSize(16f, size*2)
-        debugSprite.setSize(size*2,16f)
-//        debugSprite.setOriginCenter()
-        initDebugBody()
+        debugSprite.setSize(size, size)
+        debugSprite.setOriginCenter()
+//        initDebugBody()
     }
 
     fun render(batch: Batch) {
-//        sprite.x = body.position.x.toScreenCoordinates() - size / 2
-//        sprite.y = body.position.y.toScreenCoordinates() - size / 2
-//        sprite.rotation = Math.toDegrees(body.angle.toDouble()).toFloat()
-//        sprite.draw(batch)
+        sprite.x = body.position.x.toScreenCoordinates() - size / 2
+        sprite.y = body.position.y.toScreenCoordinates() - size / 2
+        sprite.rotation = Math.toDegrees(body.angle.toDouble()).toFloat()
+        sprite.draw(batch)
 
-        debugSprite.x = body.position.x.toScreenCoordinates()
-        debugSprite.y = body.position.y.toScreenCoordinates()
-        debugSprite.rotation = Math.toDegrees(body.angle.toDouble()).toFloat()
-        debugSprite.draw(batch)
+//        var xMod = size * sign(body.linearVelocity.x) * body.linearVelocity.x
+//        var yMod = size * sign(body.linearVelocity.y) * body.linearVelocity.y
+//
+//        debugSprite.x = body.position.x.toScreenCoordinates() - size / 2
+//        debugSprite.y = body.position.y.toScreenCoordinates() - size / 2
+//        debugSprite.rotation = Math.toDegrees(bodyAngle.toDouble()).toFloat()
+//        debugSprite.setScale(body.linearVelocity.x, body.linearVelocity.y)
+//        debugSprite.draw(batch)
     }
 
-    var dtCollect = 0f
-    var angularSpeedLimit = 0.75f
+//    var angularSpeedLimit = 3.75f
 
     fun update(dt: Float) {
-        var angleOld = body.angle//fishHiveMindDirection()
-        dtCollect -= dt
-        var angle = body.angle
-//        if (dtCollect < 0.0f) {
-//            dtCollect += 0.5f
-//        angle = when {
-//            toRepulseList.size > 0 -> {
-//                calcRepulsion()
-//            }
-//            toAlignList.size > 0 -> {
-//                calcAlignCenter()
-//            }
-//            toAttractList.size > 0 -> {
-//                calcAttractCenter()
-//            }
-//            else -> {
-//                body.angle
-////            }
-//            }
+        var angleOld = bodyAngle//fishHiveMindDirection()
+        var angle = bodyAngle
+        if (toAlignList.size > 1) {
+            angle = Math.toRadians(calcAlignCenter2().toDouble()).toFloat()
+        } else if (toAttractList.size > 1) {
+            angle = calcAttractCenter2()
+        }
+//        if (angle < angleOld - angularSpeedLimit) {
+//            angle = angleOld - angularSpeedLimit
+//        } else if (angle > angleOld + angularSpeedLimit) {
+//            angle = angleOld + angularSpeedLimit
 //        }
-//        if (dtCollect < 0.0f) {
-//            dtCollect += 0.5f
-        if (angle !in angleOld - angularSpeedLimit..angleOld + angularSpeedLimit) {
 
-        }
-        if (angle < angleOld - angularSpeedLimit) {
-            angle = angleOld - angularSpeedLimit
-        } else if (angle > angleOld + angularSpeedLimit) {
-            angle = angleOld + angularSpeedLimit
-        }
 
         var veloX = cos(angle) * velocity
         var veloY = sin(angle) * velocity
         body.setLinearVelocity(veloX, veloY)
-//        }
-//        else{
-//            body.linearVelocity = body.linearVelocity
-//        }
-
-//        debugRepBody.setTransform(
-//            body.position.x + size.toB2DCoordinates(),
-//            body.position.y + size.toB2DCoordinates(),
-//            angle
-////             Math.toDegrees(angle.toDouble()).toFloat() //- 0.75f
-//        )
+        bodyAngle = angle
         donutfyTheWorld()
     }
 
@@ -224,7 +208,7 @@ class Fish(private val body: Body, private val size: Float) {
     }
 
     fun addAlignmentSensor() {
-        var sensor = body.circle((size * 3).toB2DCoordinates()) {
+        var sensor = body.circle((size * 2.5).toB2DCoordinates()) {
             isSensor = true
             filter.categoryBits = alignFilter.toShort()
             filter.maskBits = fishFilter.toShort()
@@ -232,7 +216,7 @@ class Fish(private val body: Body, private val size: Float) {
     }
 
     fun addAttractionSensor() {
-        var sensor = body.circle((size * 5.5).toB2DCoordinates()) {
+        var sensor = body.circle((size * 4.5).toB2DCoordinates()) {
             isSensor = true
             filter.categoryBits = attractFilter.toShort()
             filter.maskBits = fishFilter.toShort()
@@ -326,5 +310,25 @@ class Fish(private val body: Body, private val size: Float) {
             }
 
         }
+    }
+
+
+    private fun calcAlignCenter2(): Float {
+        var sumVec = Vector2.Zero
+        for (fish: Fish in toAlignList) {
+            sumVec.add(fish.body.linearVelocity)
+        }
+        return sumVec.angleDeg()
+    }
+
+    /**
+     * Calculates target body angle from global mass average and its own position.
+     * Ooo soo cool it works, first try!!
+     */
+    private fun calcAttractCenter2(): Float {
+        var hiveMind = localFishHiveMindDirection(toAttractList)
+        var targetAngle =
+            atan2(hiveMind.second - body.position.y, hiveMind.first - body.position.x) * 180.0 / PI
+        return targetAngle.toFloat()
     }
 }
