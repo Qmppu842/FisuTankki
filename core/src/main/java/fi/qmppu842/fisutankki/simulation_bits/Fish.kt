@@ -85,7 +85,8 @@ class Fish(private val body: Body, private val size: Float) {
         }
 
         fun addRandomFishToWorld(world: World): Fish {
-            val radius = rand.nextInt(20, 26).toFloat()
+            var bonus = 20
+            val radius = rand.nextInt(20 + bonus, 26 + bonus).toFloat()
             val angle = rand.nextDouble(Math.PI * 2).toFloat()
             val posX = rand.nextDouble(gVars.sWidth.toDouble()).toB2DCoordinates()
             val posY = rand.nextDouble(gVars.sHeight.toDouble()).toB2DCoordinates()
@@ -99,6 +100,7 @@ class Fish(private val body: Body, private val size: Float) {
         }
     }
 
+    lateinit var debugSprite: Sprite
     fun initTexture() {
         img = if (rand.nextBoolean()) {
             Texture("SpiralKoi.png")
@@ -108,43 +110,61 @@ class Fish(private val body: Body, private val size: Float) {
         sprite = Sprite(img)
         sprite.setSize(size, size)
         sprite.setOriginCenter()
+
+        debugSprite = Sprite(Texture("randomLine.png"))
+//        debugSprite.setSize(16f, size*2)
+        debugSprite.setSize(size*2,16f)
+//        debugSprite.setOriginCenter()
         initDebugBody()
     }
 
     fun render(batch: Batch) {
-        sprite.x = body.position.x.toScreenCoordinates() - size / 2
-        sprite.y = body.position.y.toScreenCoordinates() - size / 2
-        sprite.rotation = Math.toDegrees(body.angle.toDouble()).toFloat()
-        sprite.draw(batch)
+//        sprite.x = body.position.x.toScreenCoordinates() - size / 2
+//        sprite.y = body.position.y.toScreenCoordinates() - size / 2
+//        sprite.rotation = Math.toDegrees(body.angle.toDouble()).toFloat()
+//        sprite.draw(batch)
+
+        debugSprite.x = body.position.x.toScreenCoordinates()
+        debugSprite.y = body.position.y.toScreenCoordinates()
+        debugSprite.rotation = Math.toDegrees(body.angle.toDouble()).toFloat()
+        debugSprite.draw(batch)
     }
 
     var dtCollect = 0f
-    var dtCollect2 = 0f
-    var dtCollect3 = 0f
+    var angularSpeedLimit = 0.75f
 
     fun update(dt: Float) {
-//        var angle = body.angle//fishHiveMindDirection()
+        var angleOld = body.angle//fishHiveMindDirection()
         dtCollect -= dt
         var angle = body.angle
 //        if (dtCollect < 0.0f) {
 //            dtCollect += 0.5f
-        angle = when {
+//        angle = when {
 //            toRepulseList.size > 0 -> {
 //                calcRepulsion()
 //            }
 //            toAlignList.size > 0 -> {
 //                calcAlignCenter()
 //            }
-            toAttractList.size > 0 -> {
-                calcAttractCenter()
-            }
-            else -> {
-                body.angle
+//            toAttractList.size > 0 -> {
+//                calcAttractCenter()
 //            }
-            }
-        }
+//            else -> {
+//                body.angle
+////            }
+//            }
+//        }
 //        if (dtCollect < 0.0f) {
 //            dtCollect += 0.5f
+        if (angle !in angleOld - angularSpeedLimit..angleOld + angularSpeedLimit) {
+
+        }
+        if (angle < angleOld - angularSpeedLimit) {
+            angle = angleOld - angularSpeedLimit
+        } else if (angle > angleOld + angularSpeedLimit) {
+            angle = angleOld + angularSpeedLimit
+        }
+
         var veloX = cos(angle) * velocity
         var veloY = sin(angle) * velocity
         body.setLinearVelocity(veloX, veloY)
@@ -152,6 +172,13 @@ class Fish(private val body: Body, private val size: Float) {
 //        else{
 //            body.linearVelocity = body.linearVelocity
 //        }
+
+//        debugRepBody.setTransform(
+//            body.position.x + size.toB2DCoordinates(),
+//            body.position.y + size.toB2DCoordinates(),
+//            angle
+////             Math.toDegrees(angle.toDouble()).toFloat() //- 0.75f
+//        )
         donutfyTheWorld()
     }
 
@@ -222,11 +249,11 @@ class Fish(private val body: Body, private val size: Float) {
         var targetAngle =
             atan2(hiveMind.second - body.position.y, hiveMind.first - body.position.x) * 180.0 / PI
 
-        debugRepBody.setTransform(
-            body.position.x ,
-            body.position.y ,
-            targetAngle.toFloat()
-        )
+//        debugRepBody.setTransform(
+//            body.position.x ,
+//            body.position.y ,
+//            targetAngle.toFloat()
+//        )
 
         return targetAngle.toFloat()
     }
@@ -297,6 +324,7 @@ class Fish(private val body: Body, private val size: Float) {
                 filter.categoryBits = 512.toShort()
                 filter.maskBits = 256.toShort()
             }
+
         }
     }
 }

@@ -17,7 +17,7 @@ object GlobalVariables {
 
     const val outsideBorderSize = 50f
 
-    val rand = Random(123892)
+    val rand = Random(123891)
 
     var dtMultiplier = 1f
 }

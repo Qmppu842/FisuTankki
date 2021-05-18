@@ -17,13 +17,13 @@ class MyContactListener : ContactListener {
         if (a != null && b != null) {
             var eka = contact?.fixtureA?.isSensor ?: false
             var toka = contact?.fixtureB?.isSensor ?: false
+//            gVars.dtMultiplier = 0.05f
             if (eka) {
                 when (contact?.fixtureA?.filterData?.categoryBits) {
                     Fish.repulseFilter.toShort() -> {
                         a!!.toRepulseList.add(b!!)
                     }
                     Fish.alignFilter.toShort() -> {
-                        gVars.dtMultiplier = 0.05f
                         a!!.toAlignList.add(b!!)
                     }
                     Fish.attractFilter.toShort() -> {
@@ -55,13 +55,13 @@ class MyContactListener : ContactListener {
         if (a != null && b != null) {
             var eka = contact?.fixtureA?.isSensor ?: false
             var toka = contact?.fixtureB?.isSensor ?: false
+            gVars.dtMultiplier = 1f
             if (eka) {
                 when (contact?.fixtureA?.filterData?.categoryBits) {
                     Fish.repulseFilter.toShort() -> {
                         a!!.toRepulseList.remove(b!!)
                     }
                     Fish.alignFilter.toShort() -> {
-                        gVars.dtMultiplier = 1f
                         a!!.toAlignList.remove(b!!)
                     }
                     Fish.attractFilter.toShort() -> {
