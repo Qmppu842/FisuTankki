@@ -8,13 +8,12 @@ import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.World
 import fi.qmppu842.fisutankki.GlobalVariables
+import fi.qmppu842.fisutankki.nextInRange
 import fi.qmppu842.fisutankki.toB2DCoordinates
 import fi.qmppu842.fisutankki.toScreenCoordinates
 import ktx.box2d.body
 import ktx.box2d.circle
 import ktx.box2d.edge
-import ktx.box2d.polygon
-import ktx.math.vec2
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.*
@@ -25,7 +24,7 @@ class Fish(private val body: Body, private val size: Float) {
     lateinit var sprite: Sprite
     private val gVars = GlobalVariables
 
-    private val velocity = 2f
+    private var velocity = 2f
 
     val name: String = "kala:" + UUID.randomUUID().toString()
 
@@ -71,7 +70,7 @@ class Fish(private val body: Body, private val size: Float) {
                     filter.categoryBits = fishFilter.toShort()
                     filter.maskBits =
 //                        (attractFilter or alignFilter or repulseFilter).toShort()
-                    (fishFilter or attractFilter or alignFilter or repulseFilter).toShort()
+                        (fishFilter or attractFilter or alignFilter or repulseFilter).toShort()
                 }
             }
 
@@ -106,6 +105,7 @@ class Fish(private val body: Body, private val size: Float) {
         toAlignList.add(this)
         toAttractList.add(this)
         toRepulseList.add(this)
+        velocity *= rand.nextDouble(0.8, 1.2).toFloat()
     }
 
     lateinit var debugSprite: Sprite
@@ -129,7 +129,7 @@ class Fish(private val body: Body, private val size: Float) {
     fun render(batch: Batch) {
         sprite.x = body.position.x.toScreenCoordinates() - size / 2
         sprite.y = body.position.y.toScreenCoordinates() - size / 2
-        sprite.rotation = Math.toDegrees(body.angle.toDouble()).toFloat()
+        sprite.rotation = Math.toDegrees(bodyAngle.toDouble()).toFloat()
         sprite.draw(batch)
 
 //        var xMod = size * sign(body.linearVelocity.x) * body.linearVelocity.x
@@ -142,28 +142,69 @@ class Fish(private val body: Body, private val size: Float) {
 //        debugSprite.draw(batch)
     }
 
-//    var angularSpeedLimit = 3.75f
+//    var angularSpeedLimit = .75f
 
     fun update(dt: Float) {
         var angleOld = bodyAngle//fishHiveMindDirection()
-        var angle = bodyAngle
-        if (toAlignList.size > 1) {
-            angle = Math.toRadians(calcAlignCenter2().toDouble()).toFloat()
-        } else if (toAttractList.size > 1) {
-            angle = calcAttractCenter2()
-        }
+//        var angle = bodyAngle
+//        if (toRepulseList.size > 1) {
+//            angle = calcRepulsion()
+//        } else if (toAlignList.size > 1) {
+//            angle = Math.toRadians(calcAlignCenter2().toDouble()).toFloat()
+//        } else if (toAttractList.size > 1) {
+//            angle = calcAttractCenter()
+//        }
 //        if (angle < angleOld - angularSpeedLimit) {
 //            angle = angleOld - angularSpeedLimit
 //        } else if (angle > angleOld + angularSpeedLimit) {
 //            angle = angleOld + angularSpeedLimit
 //        }
 
-
+        var angle = calcAllAngles2(angleOld)
         var veloX = cos(angle) * velocity
         var veloY = sin(angle) * velocity
         body.setLinearVelocity(veloX, veloY)
         bodyAngle = angle
         donutfyTheWorld()
+
+    }
+
+    private fun calcAllAngles(oldAngle: Float): Float {
+        return when {
+            toRepulseList.size > 1 -> {
+                calcRepulsion()
+            }
+            toAlignList.size > 1 -> {
+                Math.toRadians(calcAlignCenter2().toDouble()).toFloat()
+            }
+            toAttractList.size > 1 -> {
+                calcAttractCenter()
+            }
+            else -> oldAngle
+        }
+    }
+
+    private fun calcAllAngles2(oldAngle: Float): Float {
+        var range = 0.9f..1.1f
+        var cosSum = cos(oldAngle)
+        var sinSum = sin(oldAngle)
+        if (toRepulseList.size > 1) {
+            var cl = calcRepulsion2()
+            cosSum += cos(cl) * 6
+            sinSum += sin(cl) * 6
+        }
+//        if (toAlignList.size > 1) {
+//            var cl =Math.toRadians(calcAlignCenter2().toDouble()).toFloat()
+//            cosSum += cos(cl)*2
+//            sinSum += sin(cl)*2
+//        }
+//        if (toAttractList.size > 1) {
+//            var cl =calcAttractCenter2()
+//            cosSum += cos(cl)*2
+//            sinSum += sin(cl)*2
+//        }
+
+        return atan2(cosSum, sinSum)
     }
 
     /**
@@ -208,7 +249,7 @@ class Fish(private val body: Body, private val size: Float) {
     }
 
     fun addAlignmentSensor() {
-        var sensor = body.circle((size * 2.5).toB2DCoordinates()) {
+        var sensor = body.circle((size * 3).toB2DCoordinates()) {
             isSensor = true
             filter.categoryBits = alignFilter.toShort()
             filter.maskBits = fishFilter.toShort()
@@ -283,7 +324,7 @@ class Fish(private val body: Body, private val size: Float) {
 //            targetAngle.toFloat()
 //        )
 
-        return targetAngle.toFloat()
+        return targetAngle.toFloat() * 1.3f
     }
 
     lateinit var debugRepBody: Body
@@ -321,14 +362,27 @@ class Fish(private val body: Body, private val size: Float) {
         return sumVec.angleDeg()
     }
 
-    /**
-     * Calculates target body angle from global mass average and its own position.
-     * Ooo soo cool it works, first try!!
-     */
     private fun calcAttractCenter2(): Float {
         var hiveMind = localFishHiveMindDirection(toAttractList)
-        var targetAngle =
-            atan2(hiveMind.second - body.position.y, hiveMind.first - body.position.x) * 180.0 / PI
-        return targetAngle.toFloat()
+        var y = hiveMind.second - body.position.y * toAttractList.size
+        var x = hiveMind.first - body.position.x * toAttractList.size
+
+        y /= toRepulseList.size
+        x /= toRepulseList.size
+
+        return Vector2(x, y).angleDeg()
     }
+
+    private fun calcRepulsion2(): Float {
+        var hiveMind = localFishHiveMindDirection(toRepulseList)
+        var x = hiveMind.first - body.position.x * toRepulseList.size
+        var y = hiveMind.second - body.position.y * toRepulseList.size
+
+        x /= toRepulseList.size
+        y /= toRepulseList.size
+
+        var asd = Vector2(x, y).scl(-1f, -1f)
+        return asd.angleDeg()
+    }
+
 }
