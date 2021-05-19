@@ -17,10 +17,17 @@ object GlobalVariables {
 
     const val outsideBorderSize = 50f
 
-    val rand = Random(123891)
+    val rand = Random(123890)
 
     var dtMultiplier = 1f
 }
 
 fun Number.toB2DCoordinates(): Float = (this.toFloat() / GlobalVariables.PPM)
 fun Number.toScreenCoordinates(): Float = (this.toFloat() * GlobalVariables.PPM)
+
+fun nextInRange(range: IntRange): Int = GlobalVariables.rand.nextInt(range.first, range.last)
+fun nextInRange(range: LongRange): Long = GlobalVariables.rand.nextLong(range.first, range.last)
+
+//Sooo hacky way to get semi nice Float range randoms
+fun nextInRange(range: ClosedFloatingPointRange<Float>): Float =
+    GlobalVariables.rand.nextDouble(range.start.toDouble(), range.endInclusive.toDouble()).toFloat()
