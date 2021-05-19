@@ -73,7 +73,6 @@ class Fish(private val body: Body, private val size: Float) {
                         (fishFilter or attractFilter or alignFilter or repulseFilter).toShort()
                 }
             }
-
             val fisu = Fish(body, radius * 2)
             fisu.initTexture()
             fisu.addRepulsioSensor()
@@ -105,7 +104,12 @@ class Fish(private val body: Body, private val size: Float) {
         toAlignList.add(this)
         toAttractList.add(this)
         toRepulseList.add(this)
-        velocity *= rand.nextDouble(0.8, 1.2).toFloat()
+        velocity *= nextInRange(0.8f..1.5f)
+
+        var veloX = cos(bodyAngle) * velocity
+        var veloY = sin(bodyAngle) * velocity
+        oldVelo = Pair(veloX, veloY)
+//        body.setLinearVelocity(veloX, veloY)
     }
 
     lateinit var debugSprite: Sprite
@@ -142,9 +146,10 @@ class Fish(private val body: Body, private val size: Float) {
 //        debugSprite.draw(batch)
     }
 
-//    var angularSpeedLimit = .75f
+    //    var angularSpeedLimit = .75f
+    private var speedLimit = 2f
 
-    fun update(dt: Float) {
+    fun update2(dt: Float) {
         var angleOld = bodyAngle//fishHiveMindDirection()
 //        var angle = bodyAngle
 //        if (toRepulseList.size > 1) {
@@ -159,7 +164,6 @@ class Fish(private val body: Body, private val size: Float) {
 //        } else if (angle > angleOld + angularSpeedLimit) {
 //            angle = angleOld + angularSpeedLimit
 //        }
-
         var angle = calcAllAngles2(angleOld)
         var veloX = cos(angle) * velocity
         var veloY = sin(angle) * velocity
@@ -168,6 +172,32 @@ class Fish(private val body: Body, private val size: Float) {
         donutfyTheWorld()
 
     }
+
+    fun update(dt: Float) {
+        oldVelo = Pair(body.linearVelocity.x, body.linearVelocity.y)
+        oldAttCenter = calcAttractCenter3()
+        oldRepulsio = calcRepulsion3()
+        var align = calcAlignCenter3()
+        var veloX = (oldVelo.first + oldAttCenter.first + oldRepulsio.first + align.first) * 1.01f
+        var veloY =
+            (oldVelo.second + oldAttCenter.second + oldRepulsio.second + align.second) * 1.01f
+
+        //Speed limiter
+        var speed = sqrt(veloX * veloX + veloY * veloY)
+        if (speed > speedLimit) {
+            veloX = (veloX / speed) * speedLimit
+            veloY = (veloY / speed) * speedLimit
+        }
+
+        body.setLinearVelocity(veloX, veloY)
+//        bodyAngle = angle
+        donutfyTheWorld()
+
+    }
+
+    var oldAttCenter: Pair<Float, Float> = Pair(0f, 0f)
+    var oldRepulsio: Pair<Float, Float> = Pair(0f, 0f)
+    var oldVelo: Pair<Float, Float> = Pair(1f, 1f)
 
     private fun calcAllAngles(oldAngle: Float): Float {
         return when {
@@ -245,6 +275,7 @@ class Fish(private val body: Body, private val size: Float) {
             isSensor = true
             filter.categoryBits = repulseFilter.toShort()
             filter.maskBits = fishFilter.toShort()
+            userData = this@Fish
         }
     }
 
@@ -253,6 +284,7 @@ class Fish(private val body: Body, private val size: Float) {
             isSensor = true
             filter.categoryBits = alignFilter.toShort()
             filter.maskBits = fishFilter.toShort()
+            userData = this@Fish
         }
     }
 
@@ -383,6 +415,61 @@ class Fish(private val body: Body, private val size: Float) {
 
         var asd = Vector2(x, y).scl(-1f, -1f)
         return asd.angleDeg()
+    }
+
+    private fun calcRepulsion3(): Pair<Float, Float> {
+        var scaler = 0.05f
+        var massX = 0f
+        var massY = 0f
+        for (fish: Fish in toRepulseList) {
+            var pos = fish.getPosition()
+            massX += pos.x
+            massY += pos.y
+        }
+        var avgX = massX / toRepulseList.size
+        var avgY = massY / toRepulseList.size
+
+        var diffX = (body.position.x - avgX) * scaler
+        var diffY = (body.position.y - avgY) * scaler
+
+        return Pair(diffX, diffY)
+    }
+
+    private fun calcAttractCenter3(): Pair<Float, Float> {
+        var scaler = 0.5f
+        var massX = 0f
+        var massY = 0f
+        for (fish: Fish in toRepulseList) {
+            var pos = fish.getPosition()
+            massX += pos.x
+            massY += pos.y
+        }
+        var avgX = massX / toRepulseList.size
+        var avgY = massY / toRepulseList.size
+
+        var diffX = (avgX - body.position.x) * scaler
+        var diffY = (avgY - body.position.y) * scaler
+
+        return Pair(diffX, diffY)
+    }
+
+    private fun calcAlignCenter3(): Pair<Float, Float> {
+        var scaler = 0.5f
+        var alignX = 0f //- oldAttCenter.first - oldRepulsio.first
+        var alignY = 0f //- oldAttCenter.second - oldRepulsio.second
+        for (fish: Fish in toAlignList) {
+            var attCent = fish.oldAttCenter
+            var rep = fish.oldRepulsio
+            alignX += attCent.first + rep.first
+            alignY += attCent.second + rep.second
+        }
+
+        var avgAlignX = alignX / toAlignList.size
+        var avgAlignY = alignY / toAlignList.size
+
+        var omaX = (avgAlignX - oldAttCenter.first - oldRepulsio.first) * scaler
+        var omaY = (avgAlignY - oldAttCenter.second - oldRepulsio.second) * scaler
+        return Pair(omaX, omaY)
     }
 
 }
