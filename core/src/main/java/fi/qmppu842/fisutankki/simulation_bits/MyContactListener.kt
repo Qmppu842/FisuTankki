@@ -13,6 +13,11 @@ class MyContactListener : ContactListener {
     override fun beginContact(contact: Contact?) {
         val a: Fish? = contact?.fixtureA?.body?.userData as Fish?
         val b: Fish? = contact?.fixtureB?.body?.userData as Fish?
+
+//        val firstData = contact?.fixtureA?.body?.userData.toString()
+//        val secondData = contact?.fixtureB?.body?.userData.toString()
+//        val a: Fish? = WorldHolder.findAFish(firstData)
+//        val b: Fish? = WorldHolder.findAFish(secondData)
         if (a != null && b != null) {
             if (contact?.fixtureA?.filterData?.categoryBits == gVars.senseFilter.toShort()) {
                 a.withInSensingRange[b.name] = b
@@ -26,6 +31,11 @@ class MyContactListener : ContactListener {
     override fun endContact(contact: Contact?) {
         val a: Fish? = contact?.fixtureA?.body?.userData as Fish?
         val b: Fish? = contact?.fixtureB?.body?.userData as Fish?
+
+//        val firstData = contact?.fixtureA?.body?.userData.toString()
+//        val secondData = contact?.fixtureB?.body?.userData.toString()
+//        val a: Fish? = WorldHolder.findAFish(firstData)
+//        val b: Fish? = WorldHolder.findAFish(secondData)
         if (a != null && b != null) {
             if (contact?.fixtureA?.filterData?.categoryBits == gVars.senseFilter.toShort()) {
                 a.withInSensingRange.remove(b.name)
@@ -34,6 +44,7 @@ class MyContactListener : ContactListener {
             }
         }
     }
+
     override fun preSolve(contact: Contact?, oldManifold: Manifold?) {
     }
 

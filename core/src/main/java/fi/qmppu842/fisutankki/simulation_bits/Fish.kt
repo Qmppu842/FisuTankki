@@ -27,19 +27,19 @@ class Fish(private val body: Body, private val size: Float) {
 
     val name: String = "kala:" + UUID.randomUUID().toString()
 
-    val withInSensingRange = HashMap<String, Fish>(30)
+    val withInSensingRange = HashMap<String, Fish>(gVars.amountOfFishes)
 
     private val repulsionDistance = (size * 2f).toB2DCoordinates()
     private val alignDistance = (size * 3.5f).toB2DCoordinates()
     private val attractDistance = (size * 4.5f).toB2DCoordinates()
 
-    var bodyAngle = 0f
+//    var bodyAngle = 0f
 
     private var speedMaxLimit = 3f
 
     private var oldAttCenter: Pair<Float, Float> = Pair(0f, 0f)
     private var oldRepulsio: Pair<Float, Float> = Pair(0f, 0f)
-    private var oldVelocity: Pair<Float, Float> = Pair(1f, 1f)
+//    private var oldVelocity: Pair<Float, Float> = Pair(1f, 1f)
 
     companion object FishCurator {
 
@@ -60,7 +60,7 @@ class Fish(private val body: Body, private val size: Float) {
             radius: Float = 25f,
             posX: Float = gVars.sWidth.toB2DCoordinates() / 2,
             posY: Float = gVars.sHeight.toB2DCoordinates() / 2,
-            angle: Float = 0f
+//            angle: Float = 0f
         ): Fish {
 
             val body: Body = world.body {
@@ -80,20 +80,20 @@ class Fish(private val body: Body, private val size: Float) {
             val fisu = Fish(body, radius * 2)
             fisu.initTexture()
             body.userData = fisu
-            fisu.bodyAngle = angle
+//            fisu.bodyAngle = angle
             return fisu
         }
 
         fun addRandomFishToWorld(world: World): Fish {
             val bonus = -5
             val radius = rand.nextInt(20 + bonus, 26 + bonus).toFloat()
-            val angle = rand.nextDouble(Math.PI * 2).toFloat()
+//            val angle = rand.nextDouble(Math.PI * 2).toFloat()
             val posX = rand.nextDouble(gVars.sWidth.toDouble()).toB2DCoordinates()
             val posY = rand.nextDouble(gVars.sHeight.toDouble()).toB2DCoordinates()
             return addFishToWorld(
                 world = world,
                 radius = radius,
-                angle = angle,
+//                angle = angle,
                 posX = posX,
                 posY = posY
             )
@@ -103,13 +103,17 @@ class Fish(private val body: Body, private val size: Float) {
     init {
         withInSensingRange[name] = this
 
-        velocity *= nextInRange(0.8f..1.5f)
+//        velocity *= nextInRange(0.8f..1.5f)
 
-        val veloX = cos(bodyAngle) * velocity
-        val veloY = sin(bodyAngle) * velocity
-        oldVelocity = Pair(veloX, veloY)
+//        val veloX = cos(bodyAngle) * velocity
+//        val veloY = sin(bodyAngle) * velocity
+//        oldVelocity = Pair(veloX, veloY)
 
         addSensor(size * 5f)
+        body.linearDamping = 0f
+        body.angularDamping = 0f
+        body.userData = this
+//            name
     }
 
     fun initTexture() {
@@ -126,7 +130,7 @@ class Fish(private val body: Body, private val size: Float) {
     fun render(batch: Batch) {
         sprite.x = body.position.x.toScreenCoordinates() - size / 2
         sprite.y = body.position.y.toScreenCoordinates() - size / 2
-        sprite.rotation = Math.toDegrees(bodyAngle.toDouble()).toFloat()
+//        sprite.rotation = Math.toDegrees(bodyAngle.toDouble()).toFloat()
         sprite.draw(batch)
     }
 
@@ -186,7 +190,9 @@ class Fish(private val body: Body, private val size: Float) {
             isSensor = true
             filter.categoryBits = typeOfSensor.toShort()
             filter.maskBits = gVars.fishFilter.toShort()
-            userData = this@Fish
+            userData =
+                this@Fish
+//                name
         }
     }
 
@@ -194,16 +200,16 @@ class Fish(private val body: Body, private val size: Float) {
         val currentX = body.position.x
         val currentY = body.position.y
 
-        val repulsionScalar = 0.025f
+        val repulsionScalar = 0.25f
         var repulsionSumX = 0f
         var repulsionSumY = 0f
 
-        val alignScalar = 0.1f
+        val alignScalar = 0.9f
         var alignXSum = 0f
         var alignYSum = 0f
         var alignCounter = 0
 
-        val attractScalar = 0.005f
+        val attractScalar = 0.05f
         var attractSumX = 0f
         var attractSumY = 0f
         var attractCounter = 0
