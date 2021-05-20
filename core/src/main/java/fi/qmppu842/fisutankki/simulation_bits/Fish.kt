@@ -33,6 +33,12 @@ class Fish(private val body: Body, private val size: Float) {
 
     var bodyAngle = 0f
 
+    private var speedMaxLimit = 3f
+
+    var oldAttCenter: Pair<Float, Float> = Pair(0f, 0f)
+    var oldRepulsio: Pair<Float, Float> = Pair(0f, 0f)
+    var oldVelo: Pair<Float, Float> = Pair(1f, 1f)
+
     companion object FishCurator {
 
         private val gVars = GlobalVariables
@@ -41,6 +47,7 @@ class Fish(private val body: Body, private val size: Float) {
         val attractFilter = 4
         val alignFilter = 8
         val repulseFilter = 16
+        val wallFilter = 32
 
         /**
          * World: The world to add the fish.
@@ -68,16 +75,16 @@ class Fish(private val body: Body, private val size: Float) {
                     density = 1090f
                     filter.categoryBits = fishFilter.toShort()
                     filter.maskBits =
-                        (attractFilter or alignFilter or repulseFilter).toShort()
-//                        (fishFilter or attractFilter or alignFilter or repulseFilter).toShort()
+                        (attractFilter or alignFilter or repulseFilter or wallFilter).toShort()
+//                        (fishFilter or attractFilter or alignFilter or repulseFilter or wallFilter).toShort()
                 }
             }
             val fisu = Fish(body, radius * 2)
             fisu.initTexture()
-            fisu.addRepulsioSensor()
-            fisu.addAlignmentSensor()
-            fisu.addAttractionSensor()
-            fisu.addFishToItsOwnSensorLists()
+//            fisu.addRepulsioSensor()
+//            fisu.addAlignmentSensor()
+//            fisu.addAttractionSensor()
+//            fisu.addFishToItsOwnSensorLists()
             body.userData = fisu
             fisu.bodyAngle = angle
             return fisu
@@ -99,15 +106,30 @@ class Fish(private val body: Body, private val size: Float) {
         }
     }
 
-    fun addFishToItsOwnSensorLists() {
+    //    fun addFishToItsOwnSensorLists() {
+////        toAlignList.add(this)
+////        toAttractList.add(this)
+////        toRepulseList.add(this)
+//        velocity *= nextInRange(0.8f..1.5f)
+//
+//        var veloX = cos(bodyAngle) * velocity
+//        var veloY = sin(bodyAngle) * velocity
+//        oldVelo = Pair(veloX, veloY)
+//    }
+    init {
         toAlignList.add(this)
         toAttractList.add(this)
         toRepulseList.add(this)
+
         velocity *= nextInRange(0.8f..1.5f)
 
         var veloX = cos(bodyAngle) * velocity
         var veloY = sin(bodyAngle) * velocity
         oldVelo = Pair(veloX, veloY)
+
+        addSensor(size * 2.0f, repulseFilter)
+        addSensor(size * 3.5f, alignFilter)
+        addSensor(size * 4.5f, attractFilter)
     }
 
     fun initTexture() {
@@ -128,7 +150,6 @@ class Fish(private val body: Body, private val size: Float) {
         sprite.draw(batch)
     }
 
-    private var speedMaxLimit = 3f
 
     fun update(dt: Float) {
         oldVelo = Pair(body.linearVelocity.x, body.linearVelocity.y)
@@ -150,10 +171,6 @@ class Fish(private val body: Body, private val size: Float) {
         donutfyTheWorld()
 
     }
-
-    var oldAttCenter: Pair<Float, Float> = Pair(0f, 0f)
-    var oldRepulsio: Pair<Float, Float> = Pair(0f, 0f)
-    var oldVelo: Pair<Float, Float> = Pair(1f, 1f)
 
 
     /**
@@ -189,51 +206,13 @@ class Fish(private val body: Body, private val size: Float) {
         return body.position
     }
 
-    fun addRepulsioSensor() {
-        var sensor = body.circle((size * 2.5).toB2DCoordinates()) {
+    private fun addSensor(sizeOfSensor: Float, typeOfSensor: Int) {
+        body.circle(sizeOfSensor.toB2DCoordinates()) {
             isSensor = true
-            filter.categoryBits = repulseFilter.toShort()
+            filter.categoryBits = typeOfSensor.toShort()
             filter.maskBits = fishFilter.toShort()
             userData = this@Fish
         }
-    }
-
-    fun addAlignmentSensor() {
-        var sensor = body.circle((size * 3.5).toB2DCoordinates()) {
-            isSensor = true
-            filter.categoryBits = alignFilter.toShort()
-            filter.maskBits = fishFilter.toShort()
-            userData = this@Fish
-        }
-    }
-
-    fun addAttractionSensor() {
-        var sensor = body.circle((size * 4.5).toB2DCoordinates()) {
-            isSensor = true
-            filter.categoryBits = attractFilter.toShort()
-            filter.maskBits = fishFilter.toShort()
-            userData = this@Fish
-        }
-    }
-
-
-    private fun calcRepulsion3(): Pair<Float, Float> {
-//        if (toRepulseList.size <=1) return oldVelo
-        var scaler = 1f
-        var massX = 0f
-        var massY = 0f
-        for (fish: Fish in toRepulseList) {
-            var pos = fish.getPosition()
-            massX += pos.x
-            massY += pos.y
-        }
-        var avgX = massX / toRepulseList.size
-        var avgY = massY / toRepulseList.size
-
-        var diffX = (body.position.x - avgX) * scaler
-        var diffY = (body.position.y - avgY) * scaler
-
-        return Pair(diffX, diffY)
     }
 
     private fun calcRepulsion4(): Pair<Float, Float> {
