@@ -8,7 +8,6 @@ import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.World
 import fi.qmppu842.fisutankki.GlobalVariables
-import fi.qmppu842.fisutankki.nextInRange
 import fi.qmppu842.fisutankki.toB2DCoordinates
 import fi.qmppu842.fisutankki.toScreenCoordinates
 import ktx.box2d.body
@@ -23,8 +22,6 @@ class Fish(private val body: Body, private val size: Float) {
     private lateinit var sprite: Sprite
     private val gVars = GlobalVariables
 
-    private var velocity = 2f
-
     val name: String = "kala:" + UUID.randomUUID().toString()
 
     val withInSensingRange = HashMap<String, Fish>(gVars.amountOfFishes)
@@ -33,13 +30,10 @@ class Fish(private val body: Body, private val size: Float) {
     private val alignDistance = (size * 3.5f).toB2DCoordinates()
     private val attractDistance = (size * 4.5f).toB2DCoordinates()
 
-//    var bodyAngle = 0f
-
     private var speedMaxLimit = 3f
 
     private var oldAttCenter: Pair<Float, Float> = Pair(0f, 0f)
     private var oldRepulsio: Pair<Float, Float> = Pair(0f, 0f)
-//    private var oldVelocity: Pair<Float, Float> = Pair(1f, 1f)
 
     companion object FishCurator {
 
@@ -59,14 +53,12 @@ class Fish(private val body: Body, private val size: Float) {
             world: World,
             radius: Float = 25f,
             posX: Float = gVars.sWidth.toB2DCoordinates() / 2,
-            posY: Float = gVars.sHeight.toB2DCoordinates() / 2,
-//            angle: Float = 0f
+            posY: Float = gVars.sHeight.toB2DCoordinates() / 2
         ): Fish {
 
             val body: Body = world.body {
                 position.set(posX, posY)
                 type = BodyDef.BodyType.DynamicBody
-//                this.angle = angle
 
                 circle(radius = radius.toB2DCoordinates()) {
                     restitution = 1.5f
@@ -80,20 +72,17 @@ class Fish(private val body: Body, private val size: Float) {
             val fisu = Fish(body, radius * 2)
             fisu.initTexture()
             body.userData = fisu
-//            fisu.bodyAngle = angle
             return fisu
         }
 
         fun addRandomFishToWorld(world: World): Fish {
             val bonus = -5
             val radius = rand.nextInt(20 + bonus, 26 + bonus).toFloat()
-//            val angle = rand.nextDouble(Math.PI * 2).toFloat()
             val posX = rand.nextDouble(gVars.sWidth.toDouble()).toB2DCoordinates()
             val posY = rand.nextDouble(gVars.sHeight.toDouble()).toB2DCoordinates()
             return addFishToWorld(
                 world = world,
                 radius = radius,
-//                angle = angle,
                 posX = posX,
                 posY = posY
             )
@@ -102,12 +91,6 @@ class Fish(private val body: Body, private val size: Float) {
 
     init {
         withInSensingRange[name] = this
-
-//        velocity *= nextInRange(0.8f..1.5f)
-
-//        val veloX = cos(bodyAngle) * velocity
-//        val veloY = sin(bodyAngle) * velocity
-//        oldVelocity = Pair(veloX, veloY)
 
         addSensor(size * 5f)
         body.linearDamping = 0f
@@ -204,7 +187,7 @@ class Fish(private val body: Body, private val size: Float) {
         var repulsionSumX = 0f
         var repulsionSumY = 0f
 
-        val alignScalar = 0.9f
+        val alignScalar = 1.2f
         var alignXSum = 0f
         var alignYSum = 0f
         var alignCounter = 0
