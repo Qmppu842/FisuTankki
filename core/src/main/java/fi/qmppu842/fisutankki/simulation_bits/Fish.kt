@@ -14,7 +14,6 @@ import fi.qmppu842.fisutankki.toScreenCoordinates
 import ktx.box2d.body
 import ktx.box2d.circle
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.math.*
 
@@ -28,28 +27,25 @@ class Fish(private val body: Body, private val size: Float) {
 
     val name: String = "kala:" + UUID.randomUUID().toString()
 
-    val toRepulseList = ArrayList<Fish>()
-    val toAlignList = ArrayList<Fish>()
-    val toAttractList = ArrayList<Fish>()
-    val withInSensingRange = HashMap<String, Fish>(20)
+    val withInSensingRange = HashMap<String, Fish>(30)
+
+    private val repulsionDistance = (size * 2f).toB2DCoordinates()
+    private val alignDistance = (size * 3.5f).toB2DCoordinates()
+    private val attractDistance = (size * 4.5f).toB2DCoordinates()
 
     var bodyAngle = 0f
 
     private var speedMaxLimit = 3f
 
-    var oldAttCenter: Pair<Float, Float> = Pair(0f, 0f)
-    var oldRepulsio: Pair<Float, Float> = Pair(0f, 0f)
-    var oldVelo: Pair<Float, Float> = Pair(1f, 1f)
+    private var oldAttCenter: Pair<Float, Float> = Pair(0f, 0f)
+    private var oldRepulsio: Pair<Float, Float> = Pair(0f, 0f)
+    var oldVelocity: Pair<Float, Float> = Pair(1f, 1f)
 
     companion object FishCurator {
 
         private val gVars = GlobalVariables
         private val rand = gVars.rand
-        val fishFilter = 2
-        val attractFilter = 4
-        val alignFilter = 8
-        val repulseFilter = 16
-        val wallFilter = 32
+
 
         /**
          * World: The world to add the fish.
@@ -75,18 +71,14 @@ class Fish(private val body: Body, private val size: Float) {
                 circle(radius = radius.toB2DCoordinates()) {
                     restitution = 1.5f
                     density = 1090f
-                    filter.categoryBits = fishFilter.toShort()
+                    filter.categoryBits = gVars.fishFilter.toShort()
                     filter.maskBits =
-                        (attractFilter or alignFilter or repulseFilter or wallFilter).toShort()
+                        (gVars.attractFilter or gVars.alignFilter or gVars.repulseFilter or gVars.wallFilter or gVars.senseFilter).toShort()
 //                        (fishFilter or attractFilter or alignFilter or repulseFilter or wallFilter).toShort()
                 }
             }
             val fisu = Fish(body, radius * 2)
             fisu.initTexture()
-//            fisu.addRepulsioSensor()
-//            fisu.addAlignmentSensor()
-//            fisu.addAttractionSensor()
-//            fisu.addFishToItsOwnSensorLists()
             body.userData = fisu
             fisu.bodyAngle = angle
             return fisu
@@ -109,19 +101,15 @@ class Fish(private val body: Body, private val size: Float) {
     }
 
     init {
-        toAlignList.add(this)
-        toAttractList.add(this)
-        toRepulseList.add(this)
+        withInSensingRange[name] = this
 
         velocity *= nextInRange(0.8f..1.5f)
 
         var veloX = cos(bodyAngle) * velocity
         var veloY = sin(bodyAngle) * velocity
-        oldVelo = Pair(veloX, veloY)
+        oldVelocity = Pair(veloX, veloY)
 
-        addSensor(size * 2.0f, repulseFilter)
-        addSensor(size * 3.5f, alignFilter)
-        addSensor(size * 4.5f, attractFilter)
+        addSensor(size * 5f, gVars.senseFilter)
     }
 
     fun initTexture() {
@@ -144,16 +132,12 @@ class Fish(private val body: Body, private val size: Float) {
 
 
     fun update(dt: Float) {
-        oldVelo = Pair(body.linearVelocity.x, body.linearVelocity.y)
-        oldAttCenter = calcAttractCenter3()
-        oldRepulsio = calcRepulsion4()
-        var align = calcAlignCenter3()
-        var veloX = (oldVelo.first + oldAttCenter.first + oldRepulsio.first + align.first) //* 1.01f
-        var veloY =
-            (oldVelo.second + oldAttCenter.second + oldRepulsio.second + align.second) //* 1.01f
+        val newVelocity = calcNewVelocity()
+        var veloX = newVelocity.first
+        var veloY = newVelocity.second
 
         //Speed limiter
-        var speed = sqrt(veloX * veloX + veloY * veloY)
+        val speed = sqrt(veloX * veloX + veloY * veloY)
         if (speed > speedMaxLimit) {
             veloX = (veloX / speed) * speedMaxLimit
             veloY = (veloY / speed) * speedMaxLimit
@@ -161,7 +145,6 @@ class Fish(private val body: Body, private val size: Float) {
 
         body.setLinearVelocity(veloX, veloY)
         donutfyTheWorld()
-
     }
 
 
@@ -202,66 +185,10 @@ class Fish(private val body: Body, private val size: Float) {
         body.circle(sizeOfSensor.toB2DCoordinates()) {
             isSensor = true
             filter.categoryBits = typeOfSensor.toShort()
-            filter.maskBits = fishFilter.toShort()
+            filter.maskBits = gVars.fishFilter.toShort()
             userData = this@Fish
         }
     }
-
-    private fun calcRepulsion4(): Pair<Float, Float> {
-        var scaler = 0.025f
-        var massX = 0f
-        var massY = 0f
-        for (fish: Fish in toRepulseList) {
-            var pos = fish.getPosition()
-            massX += body.position.x - pos.x
-            massY += body.position.y - pos.y
-        }
-        var diffX = (massX) * scaler
-        var diffY = (massY) * scaler
-
-        return Pair(diffX, diffY)
-    }
-
-    private fun calcAttractCenter3(): Pair<Float, Float> {
-        var scaler = 0.005f
-        var massX = 0f
-        var massY = 0f
-        for (fish: Fish in toAttractList) {
-            var pos = fish.getPosition()
-            massX += pos.x
-            massY += pos.y
-        }
-        var avgX = massX / toAttractList.size
-        var avgY = massY / toAttractList.size
-
-        var diffX = (avgX - body.position.x) * scaler
-        var diffY = (avgY - body.position.y) * scaler
-
-        return Pair(diffX, diffY)
-    }
-
-    private fun calcAlignCenter3(): Pair<Float, Float> {
-        var scaler = 0.1f
-        var alignX = 0f
-        var alignY = 0f
-        for (fish: Fish in toAlignList) {
-            var attCent = fish.oldAttCenter
-            var rep = fish.oldRepulsio
-            alignX += attCent.first + rep.first
-            alignY += attCent.second + rep.second
-        }
-
-        var avgAlignX = alignX / toAlignList.size
-        var avgAlignY = alignY / toAlignList.size
-
-        var omaX = (avgAlignX - oldAttCenter.first - oldRepulsio.first) * scaler
-        var omaY = (avgAlignY - oldAttCenter.second - oldRepulsio.second) * scaler
-        return Pair(omaX, omaY)
-    }
-
-    val repulsionDistance = size * 2f
-    val alignDistance = size * 3.5f
-    val attractDistance = size * 4.5f
 
     private fun calcNewVelocity(): Pair<Float, Float> {
         val currentX = body.position.x
@@ -311,19 +238,23 @@ class Fish(private val body: Body, private val size: Float) {
         val attractionCenterY = ((attractSumY / attractCounter) - currentY) * attractScalar
         oldAttCenter = Pair(attractionCenterX, attractionCenterY)
 
+        //Calculate Repulsion Center
         val repulsionCenterX = repulsionSumX * repulsionScalar
         val repulsionCenterY = repulsionSumY * repulsionScalar
         oldRepulsio = Pair(repulsionCenterX, repulsionCenterY)
 
-        val alignCenterX = ((alignXSum / alignCounter) - oldAttCenter.first -oldRepulsio.first) * alignScalar
-        val alignCenterY = ((alignYSum / alignCounter) - oldAttCenter.second -oldRepulsio.second) * alignScalar
+        //Calculate Alignment Center
+        val alignCenterX =
+            ((alignXSum / alignCounter) - oldAttCenter.first - oldRepulsio.first) * alignScalar
+        val alignCenterY =
+            ((alignYSum / alignCounter) - oldAttCenter.second - oldRepulsio.second) * alignScalar
 
         val oldVelocity = body.linearVelocity
 
         val newVelocityX = oldVelocity.x + alignCenterX + repulsionCenterX + attractionCenterX
-        val newVelocityY =  oldVelocity.y + alignCenterY + repulsionCenterY + attractionCenterY
+        val newVelocityY = oldVelocity.y + alignCenterY + repulsionCenterY + attractionCenterY
 
-       return Pair(newVelocityX,newVelocityY)
+        return Pair(newVelocityX, newVelocityY)
     }
 
 }
