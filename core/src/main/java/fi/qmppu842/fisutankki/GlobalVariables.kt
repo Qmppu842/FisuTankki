@@ -29,6 +29,8 @@ object GlobalVariables {
     val senseFilter = 64
 
     val wallExtra = 127
+
+    val amountOfFishes = 15
 }
 
 fun Number.toB2DCoordinates(): Float = (this.toFloat() / GlobalVariables.PPM)
