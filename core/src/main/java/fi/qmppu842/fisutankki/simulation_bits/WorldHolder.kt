@@ -11,7 +11,7 @@ import ktx.box2d.createWorld
 
 class WorldHolder {
     private val fishList = ArrayList<Fish>(20)
-    val world = createWorld(gravity = Vector2.Zero, true)
+    private val world = createWorld(gravity = Vector2.Zero, true)
     private val fishNameMap = HashMap<String, Fish>(20)
 
     private val gVars = GlobalVariables
@@ -19,7 +19,7 @@ class WorldHolder {
 
     init {
         world.setContactListener(MyContactListener())
-        addWalls()
+//        addWalls()
     }
 
     companion object WorldObject {
@@ -33,7 +33,7 @@ class WorldHolder {
     }
 
     fun update(dt: Float) {
-        var dt2 = dt * gVars.dtMultiplier
+        val dt2 = dt * gVars.dtMultiplier
         world.step(dt2, 6, 2)
         for (fish: Fish in fishList) {
             fish.update(dt2)
@@ -42,17 +42,15 @@ class WorldHolder {
 
     fun addSchoolOfFishToWorld() {
         for (i in 1..20) {
-            var fishe = Fish.addRandomFishToWorld(world)
+            val fishe = Fish.addRandomFishToWorld(world)
             fishList.add(fishe)
             fishNameMap[fishe.name] = fishe
         }
     }
 
-
-    var wallFilter = 32
     private fun addWalls() {
+        val standardOffSize = 50f
         //Vertical walls
-        var standardOffSize = 50f
         addWall(
             x = gVars.sWidth,
             y = gVars.sHeight / 2,
@@ -87,8 +85,8 @@ class WorldHolder {
             position.set(x.toB2DCoordinates(), y.toB2DCoordinates())
             type = BodyDef.BodyType.StaticBody
             box(width = (width + 2).toB2DCoordinates(), height = (height + 2).toB2DCoordinates()) {
-                filter.categoryBits = 31.toShort()
-                filter.maskBits = (Fish.fishFilter or Fish.repulseFilter or wallFilter).toShort()
+                filter.categoryBits = gVars.wallExtra.toShort()
+                filter.maskBits = (gVars.fishFilter or gVars.repulseFilter or gVars.wallFilter).toShort()
             }
         }
     }
