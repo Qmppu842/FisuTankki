@@ -20,6 +20,15 @@ object GlobalVariables {
     val rand = Random(123890)
 
     var dtMultiplier = 1f
+
+    val fishFilter = 2
+    val attractFilter = 4
+    val alignFilter = 8
+    val repulseFilter = 16
+    val wallFilter = 32
+    val senseFilter = 64
+
+    val wallExtra = 127
 }
 
 fun Number.toB2DCoordinates(): Float = (this.toFloat() / GlobalVariables.PPM)
