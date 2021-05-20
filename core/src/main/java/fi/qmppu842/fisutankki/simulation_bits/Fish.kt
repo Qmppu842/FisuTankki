@@ -15,6 +15,7 @@ import ktx.box2d.body
 import ktx.box2d.circle
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 import kotlin.math.*
 
 class Fish(private val body: Body, private val size: Float) {
@@ -30,6 +31,7 @@ class Fish(private val body: Body, private val size: Float) {
     val toRepulseList = ArrayList<Fish>()
     val toAlignList = ArrayList<Fish>()
     val toAttractList = ArrayList<Fish>()
+    val withInSensingRange = HashMap<String, Fish>(20)
 
     var bodyAngle = 0f
 
@@ -106,16 +108,6 @@ class Fish(private val body: Body, private val size: Float) {
         }
     }
 
-    //    fun addFishToItsOwnSensorLists() {
-////        toAlignList.add(this)
-////        toAttractList.add(this)
-////        toRepulseList.add(this)
-//        velocity *= nextInRange(0.8f..1.5f)
-//
-//        var veloX = cos(bodyAngle) * velocity
-//        var veloY = sin(bodyAngle) * velocity
-//        oldVelo = Pair(veloX, veloY)
-//    }
     init {
         toAlignList.add(this)
         toAttractList.add(this)
@@ -265,6 +257,73 @@ class Fish(private val body: Body, private val size: Float) {
         var omaX = (avgAlignX - oldAttCenter.first - oldRepulsio.first) * scaler
         var omaY = (avgAlignY - oldAttCenter.second - oldRepulsio.second) * scaler
         return Pair(omaX, omaY)
+    }
+
+    val repulsionDistance = size * 2f
+    val alignDistance = size * 3.5f
+    val attractDistance = size * 4.5f
+
+    private fun calcNewVelocity(): Pair<Float, Float> {
+        val currentX = body.position.x
+        val currentY = body.position.y
+
+        val repulsionScalar = 0.025f
+        var repulsionSumX = 0f
+        var repulsionSumY = 0f
+
+        val alignScalar = 0.1f
+        var alignXSum = 0f
+        var alignYSum = 0f
+        var alignCounter = 0
+
+        val attractScalar = 0.005f
+        var attractSumX = 0f
+        var attractSumY = 0f
+        var attractCounter = 0
+
+        for (fish in withInSensingRange.values) {
+            val fishX = fish.getPosition().x
+            val fishY = fish.getPosition().y
+            val distance = sqrt((currentX - fishX).pow(2) + (currentY - fishY).pow(2))
+
+            if (distance < attractDistance) {
+                attractSumX += fishX
+                attractSumY += fishY
+                attractCounter++
+            }
+
+            if (distance < alignDistance) {
+                val attractionCenterOld = fish.oldAttCenter
+                val repulsionPointOld = fish.oldRepulsio
+                alignXSum += attractionCenterOld.first + repulsionPointOld.first
+                alignYSum += attractionCenterOld.second + repulsionPointOld.second
+                alignCounter++
+            }
+
+            if (distance < repulsionDistance) {
+                repulsionSumX += currentX - fishX
+                repulsionSumY += currentY - fishY
+            }
+        }
+
+        //Calculate Attraction Center
+        val attractionCenterX = ((attractSumX / attractCounter) - currentX) * attractScalar
+        val attractionCenterY = ((attractSumY / attractCounter) - currentY) * attractScalar
+        oldAttCenter = Pair(attractionCenterX, attractionCenterY)
+
+        val repulsionCenterX = repulsionSumX * repulsionScalar
+        val repulsionCenterY = repulsionSumY * repulsionScalar
+        oldRepulsio = Pair(repulsionCenterX, repulsionCenterY)
+
+        val alignCenterX = ((alignXSum / alignCounter) - oldAttCenter.first -oldRepulsio.first) * alignScalar
+        val alignCenterY = ((alignYSum / alignCounter) - oldAttCenter.second -oldRepulsio.second) * alignScalar
+
+        val oldVelocity = body.linearVelocity
+
+        val newVelocityX = oldVelocity.x + alignCenterX + repulsionCenterX + attractionCenterX
+        val newVelocityY =  oldVelocity.y + alignCenterY + repulsionCenterY + attractionCenterY
+
+       return Pair(newVelocityX,newVelocityY)
     }
 
 }
