@@ -41,16 +41,13 @@ class WorldHolder {
     }
 
     fun addSchoolOfFishToWorld() {
-        for (i in 1..30) {
+        for (i in 1..20) {
             var fishe = Fish.addRandomFishToWorld(world)
             fishList.add(fishe)
             fishNameMap[fishe.name] = fishe
         }
     }
 
-    fun getFish(name: String): Fish? {
-        return fishNameMap[name]
-    }
 
     var wallFilter = 32
     private fun addWalls() {
@@ -70,18 +67,17 @@ class WorldHolder {
             height = gVars.sHeight
         )
 
-
         //Horizontal walls
         addWall(
             x = gVars.sWidth / 2,
             y = 0f,
-            width = gVars.sWidth - standardOffSize-2,
+            width = gVars.sWidth - standardOffSize-5,
             height = standardOffSize
         )
         addWall(
             x = gVars.sWidth / 2,
             y = gVars.sHeight,
-            width = gVars.sWidth - standardOffSize -2,
+            width = gVars.sWidth - standardOffSize -5,
             height = standardOffSize
         )
     }
