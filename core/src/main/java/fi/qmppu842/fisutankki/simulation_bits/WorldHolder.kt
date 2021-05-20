@@ -10,11 +10,11 @@ import ktx.box2d.box
 import ktx.box2d.createWorld
 
 class WorldHolder {
-    private val fishList = ArrayList<Fish>(20)
-    private val world = createWorld(gravity = Vector2.Zero, true)
-    private val fishNameMap = HashMap<String, Fish>(20)
 
     private val gVars = GlobalVariables
+    private val world = createWorld(gravity = Vector2.Zero, true)
+    private val fishNameMap = HashMap<String, Fish>(gVars.amountOfFishes)
+
 
 
     init {
@@ -24,10 +24,14 @@ class WorldHolder {
 
     companion object WorldObject {
         val worldHolder = WorldHolder()
+
+        fun findAFish(name:String): Fish? {
+            return worldHolder.fishNameMap[name]
+        }
     }
 
     fun render(batch: Batch) {
-        for (fish: Fish in fishList) {
+        for (fish: Fish in fishNameMap.values) {
             fish.render(batch)
         }
     }
@@ -35,15 +39,14 @@ class WorldHolder {
     fun update(dt: Float) {
         val dt2 = dt * gVars.dtMultiplier
         world.step(dt2, 6, 2)
-        for (fish: Fish in fishList) {
+        for (fish: Fish in fishNameMap.values) {
             fish.update()
         }
     }
 
     fun addSchoolOfFishToWorld() {
-        for (i in 1..20) {
+        for (i in 1..gVars.amountOfFishes) {
             val fishe = Fish.addRandomFishToWorld(world)
-            fishList.add(fishe)
             fishNameMap[fishe.name] = fishe
         }
     }
