@@ -36,7 +36,7 @@ class WorldHolder {
         val dt2 = dt * gVars.dtMultiplier
         world.step(dt2, 6, 2)
         for (fish: Fish in fishList) {
-            fish.update(dt2)
+            fish.update()
         }
     }
 

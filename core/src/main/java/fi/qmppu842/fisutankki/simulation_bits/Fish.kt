@@ -19,8 +19,8 @@ import kotlin.math.*
 
 class Fish(private val body: Body, private val size: Float) {
 
-    lateinit var img: Texture
-    lateinit var sprite: Sprite
+    private lateinit var img: Texture
+    private lateinit var sprite: Sprite
     private val gVars = GlobalVariables
 
     private var velocity = 2f
@@ -39,7 +39,7 @@ class Fish(private val body: Body, private val size: Float) {
 
     private var oldAttCenter: Pair<Float, Float> = Pair(0f, 0f)
     private var oldRepulsio: Pair<Float, Float> = Pair(0f, 0f)
-    var oldVelocity: Pair<Float, Float> = Pair(1f, 1f)
+    private var oldVelocity: Pair<Float, Float> = Pair(1f, 1f)
 
     companion object FishCurator {
 
@@ -85,7 +85,7 @@ class Fish(private val body: Body, private val size: Float) {
         }
 
         fun addRandomFishToWorld(world: World): Fish {
-            var bonus = -5
+            val bonus = -5
             val radius = rand.nextInt(20 + bonus, 26 + bonus).toFloat()
             val angle = rand.nextDouble(Math.PI * 2).toFloat()
             val posX = rand.nextDouble(gVars.sWidth.toDouble()).toB2DCoordinates()
@@ -105,11 +105,11 @@ class Fish(private val body: Body, private val size: Float) {
 
         velocity *= nextInRange(0.8f..1.5f)
 
-        var veloX = cos(bodyAngle) * velocity
-        var veloY = sin(bodyAngle) * velocity
+        val veloX = cos(bodyAngle) * velocity
+        val veloY = sin(bodyAngle) * velocity
         oldVelocity = Pair(veloX, veloY)
 
-        addSensor(size * 5f, gVars.senseFilter)
+        addSensor(size * 5f)
     }
 
     fun initTexture() {
@@ -131,7 +131,7 @@ class Fish(private val body: Body, private val size: Float) {
     }
 
 
-    fun update(dt: Float) {
+    fun update() {
         val newVelocity = calcNewVelocity()
         var veloX = newVelocity.first
         var veloY = newVelocity.second
@@ -181,7 +181,7 @@ class Fish(private val body: Body, private val size: Float) {
         return body.position
     }
 
-    private fun addSensor(sizeOfSensor: Float, typeOfSensor: Int) {
+    private fun addSensor(sizeOfSensor: Float, typeOfSensor: Int = gVars.senseFilter) {
         body.circle(sizeOfSensor.toB2DCoordinates()) {
             isSensor = true
             filter.categoryBits = typeOfSensor.toShort()
