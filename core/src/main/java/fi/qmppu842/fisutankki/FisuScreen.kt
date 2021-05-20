@@ -27,7 +27,7 @@ class FisuScreen : KtxScreen {
     init {
         b2dCam.setToOrtho(false, gVars.sWidth.toB2DCoordinates(), gVars.sHeight.toB2DCoordinates())
         cam.setToOrtho(false, gVars.sWidth, gVars.sHeight)
-        b2dCam.zoom =2f
+//        b2dCam.zoom =2f
         b2dCam.update()
     }
 
