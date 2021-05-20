@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.BodyDef
 import fi.qmppu842.fisutankki.GlobalVariables
+import fi.qmppu842.fisutankki.toB2DCoordinates
 import ktx.box2d.body
 import ktx.box2d.box
 import ktx.box2d.createWorld
@@ -18,7 +19,7 @@ class WorldHolder {
 
     init {
         world.setContactListener(MyContactListener())
-//        addWalls()
+        addWalls()
     }
 
     companion object WorldObject {
@@ -40,7 +41,7 @@ class WorldHolder {
     }
 
     fun addSchoolOfFishToWorld() {
-        for (i in 1..20) {
+        for (i in 1..30) {
             var fishe = Fish.addRandomFishToWorld(world)
             fishList.add(fishe)
             fishNameMap[fishe.name] = fishe
@@ -51,23 +52,48 @@ class WorldHolder {
         return fishNameMap[name]
     }
 
+    var wallFilter = 32
     private fun addWalls() {
-        var wall1 = world.body(type = BodyDef.BodyType.StaticBody) {
-            position.set(0f, -gVars.outsideBorderSize / 2)
-            box(width = gVars.sWidth, height = gVars.outsideBorderSize) {
-                filter.categoryBits = Fish.fishFilter.toShort()
-                filter.maskBits = (Fish.fishFilter or Fish.repulseFilter).toShort()
+        //Vertical walls
+        var standardOffSize = 50f
+        addWall(
+            x = gVars.sWidth,
+            y = gVars.sHeight / 2,
+            width = standardOffSize,
+            height = gVars.sHeight
+        )
+
+        addWall(
+            x = 0f,
+            y = gVars.sHeight / 2,
+            width = standardOffSize,
+            height = gVars.sHeight
+        )
+
+
+        //Horizontal walls
+        addWall(
+            x = gVars.sWidth / 2,
+            y = 0f,
+            width = gVars.sWidth - standardOffSize-2,
+            height = standardOffSize
+        )
+        addWall(
+            x = gVars.sWidth / 2,
+            y = gVars.sHeight,
+            width = gVars.sWidth - standardOffSize -2,
+            height = standardOffSize
+        )
+    }
+
+    private fun addWall(x: Float, y: Float, width: Float, height: Float) {
+        world.body {
+            position.set(x.toB2DCoordinates(), y.toB2DCoordinates())
+            type = BodyDef.BodyType.StaticBody
+            box(width = (width + 2).toB2DCoordinates(), height = (height + 2).toB2DCoordinates()) {
+                filter.categoryBits = 31.toShort()
+                filter.maskBits = (Fish.fishFilter or Fish.repulseFilter or wallFilter).toShort()
             }
-
         }
-//        var wall2 = world.body(type = BodyDef.BodyType.StaticBody) {
-//            position.set(0f, gVars.outsideBorderSize / 2)
-//            box(width = gVars.sWidth, height = gVars.outsideBorderSize) {
-//                filter.categoryBits = Fish.fishFilter.toShort()
-//                filter.maskBits = (Fish.fishFilter or Fish.repulseFilter).toShort()
-//            }
-//
-//        }
-
     }
 }
