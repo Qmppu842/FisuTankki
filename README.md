@@ -18,3 +18,7 @@ If you want more or less fish to be on screen at one time, there is variable amo
 There put any number you think your phone (or emulator) can handle.  
 
 This App does not have any controlls because thouse would ruin the relaxing feeling that is just watching peppermint candies floacking.  
+
+## Easy way
+Apk is now in release tab!
+Soo just download it to your phone and enjoy.
