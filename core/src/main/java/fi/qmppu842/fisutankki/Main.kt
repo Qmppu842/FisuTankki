@@ -24,10 +24,22 @@ class Main : KtxGame<KtxScreen>() {
     }
 
     override fun render() {
-        accum += Gdx.graphics.deltaTime
+        accum += Gdx.graphics.deltaTime*pauseMultiplier
         while (accum > STEP_SIZE) {
             accum -= STEP_SIZE
             currentScreen.render(STEP_SIZE)
         }
+    }
+
+    var pauseMultiplier = 1f
+
+    override fun pause() {
+        pauseMultiplier = 0f
+        super.pause()
+    }
+
+    override fun resume() {
+        super.resume()
+        pauseMultiplier = 1f
     }
 }
