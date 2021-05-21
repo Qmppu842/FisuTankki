@@ -18,7 +18,7 @@ import kotlin.math.*
 
 class Fish(private val body: Body, private val size: Float) {
 
-    private lateinit var img: Texture
+//    private lateinit var img: Texture
     private lateinit var sprite: Sprite
     private val gVars = GlobalVariables
 
@@ -92,7 +92,7 @@ class Fish(private val body: Body, private val size: Float) {
     init {
         withInSensingRange[name] = this
 
-        addSensor(size * 5f)
+//        addSensor(size * 5f)
         body.linearDamping = 0f
         body.angularDamping = 0f
         body.userData = this
@@ -100,11 +100,7 @@ class Fish(private val body: Body, private val size: Float) {
     }
 
     fun initTexture() {
-        img = if (rand.nextBoolean()) {
-            Texture("SpiralKoi.png")
-        } else {
-            Texture("SpiralKoi2.png")
-        }
+        var img = gVars.getTexture()
         sprite = Sprite(img)
         sprite.setSize(size, size)
         sprite.setOriginCenter()
@@ -133,7 +129,6 @@ class Fish(private val body: Body, private val size: Float) {
         body.setLinearVelocity(veloX, veloY)
         donutfyTheWorld()
     }
-
 
     /**
      * When Fish tries to exit too far, this method will bring them back on the other side of the world.
@@ -183,21 +178,23 @@ class Fish(private val body: Body, private val size: Float) {
         val currentX = body.position.x
         val currentY = body.position.y
 
-        val repulsionScalar = 0.25f
+        val repulsionScalar = 0.3f
         var repulsionSumX = 0f
         var repulsionSumY = 0f
 
-        val alignScalar = 1.2f
+        val alignScalar = 0.5f
         var alignXSum = 0f
         var alignYSum = 0f
         var alignCounter = 0
 
-        val attractScalar = 0.05f
+        val attractScalar = 0.2f
         var attractSumX = 0f
         var attractSumY = 0f
         var attractCounter = 0
 
-        for (fish in withInSensingRange.values) {
+        //Swap these to easily switch between the naive and the box2d mix approaches.
+//        for (fish in withInSensingRange.values) {
+        for (fish in WorldHolder.findAllFishes()) {
             val fishX = fish.getPosition().x
             val fishY = fish.getPosition().y
             val distance = sqrt((currentX - fishX).pow(2) + (currentY - fishY).pow(2))
