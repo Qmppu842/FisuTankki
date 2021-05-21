@@ -34,6 +34,7 @@ class FisuScreen : KtxScreen {
 
     override fun show() {
         // Prepare your screen here.
+        gVars.initTexture()
         WorldHolder.worldHolder.addSchoolOfFishToWorld()
     }
 
@@ -73,5 +74,6 @@ class FisuScreen : KtxScreen {
 
     override fun dispose() {
         // Destroy screen's assets here.
+        WorldHolder.worldHolder.dispose()
     }
 }
