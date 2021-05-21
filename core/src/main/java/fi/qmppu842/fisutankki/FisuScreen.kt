@@ -75,5 +75,6 @@ class FisuScreen : KtxScreen {
     override fun dispose() {
         // Destroy screen's assets here.
         WorldHolder.worldHolder.dispose()
+        gVars.dispose()
     }
 }
