@@ -1,6 +1,8 @@
 package fi.qmppu842.fisutankki
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Texture
+import fi.qmppu842.fisutankki.simulation_bits.Fish
 import kotlin.random.Random
 
 object GlobalVariables {
@@ -30,7 +32,28 @@ object GlobalVariables {
 
     val wallExtra = 127
 
-    val amountOfFishes = 15
+    val amountOfFishes = 30
+
+    lateinit var img1: Texture
+    lateinit var img2: Texture
+
+    fun initTexture() {
+        img1 = Texture("SpiralKoi.png")
+        img2 = Texture("SpiralKoi2.png")
+    }
+
+    fun getTexture(): Texture {
+        return if (rand.nextBoolean()) {
+            img1
+        } else {
+            img2
+        }
+    }
+
+    fun dispose(){
+        img1.dispose()
+        img2.dispose()
+    }
 }
 
 fun Number.toB2DCoordinates(): Float = (this.toFloat() / GlobalVariables.PPM)
