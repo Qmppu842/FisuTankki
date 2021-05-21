@@ -17,16 +17,20 @@ class WorldHolder {
 
 
 
-    init {
-        world.setContactListener(MyContactListener())
+//    init {
+//        world.setContactListener(MyContactListener())
 //        addWalls()
-    }
+//    }
 
     companion object WorldObject {
         val worldHolder = WorldHolder()
 
         fun findAFish(name:String): Fish? {
             return worldHolder.fishNameMap[name]
+        }
+
+        fun findAllFishes(): MutableCollection<Fish> {
+            return worldHolder.fishNameMap.values
         }
     }
 
@@ -92,5 +96,9 @@ class WorldHolder {
                 filter.maskBits = (gVars.fishFilter or gVars.repulseFilter or gVars.wallFilter).toShort()
             }
         }
+    }
+
+    fun dispose(){
+        world.dispose()
     }
 }
