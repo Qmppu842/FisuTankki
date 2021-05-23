@@ -19,7 +19,7 @@ object GlobalVariables {
 
     const val outsideBorderSize = 50f
 
-    val rand = Random(123890)
+    val rand = Random(System.currentTimeMillis())
 
     var dtMultiplier = 1f
 
